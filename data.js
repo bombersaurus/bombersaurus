@@ -1,6 +1,6 @@
 
 window.RWH_DATA = {
-  version: "2.1.0",
+  version: "4.0.0",
   courses: {
     digitalSkills: {
       id: "digitalSkills",
