@@ -750,3 +750,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   outline:3px solid rgba(38,87,200,.22);
   outline-offset:2px;
 }
+
+.sidebar-close{
+  display:none;
+  position:absolute;
+  top:8px;
+  right:8px;
+  min-height:34px;
+  padding:7px 10px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:10px;
+  background:rgba(255,255,255,.06);
+  color:#d8e0ea;
+  font-size:11px;
+  font-weight:700;
+}
+.sidebar-close:hover{background:rgba(255,255,255,.11);color:#fff}
+@media(max-width:1024px){.sidebar-close{display:inline-flex;align-items:center;justify-content:center}}
