@@ -49,6 +49,7 @@ const DEFAULT_STATE = () => ({
   resources: [],
   comms: [],
   vault: [],
+  aiMessages: [],
   lastPage: 'dashboard',
   createdAt: new Date().toISOString()
 });
@@ -96,7 +97,7 @@ function migrate(s){
   s = Object.assign(base,s||{});
   s.prefs = Object.assign(base.prefs,s.prefs||{});
   ['coverage'].forEach(k=>{ if(!s[k] || typeof s[k] !== 'object') s[k]={}; });
-  ['lessons','marking','briefs','assessments','espItems','tasks','learners','attendance','oneToOnes','progression','timetable','rooms','employers','resources','comms','vault']
+  ['lessons','marking','briefs','assessments','espItems','tasks','learners','attendance','oneToOnes','progression','timetable','rooms','employers','resources','comms','vault','aiMessages']
     .forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; });
   s.schema = SCHEMA;
   return s;
@@ -984,9 +985,42 @@ function copyComm(){const t=document.getElementById('commDraft').value;if(!t)ret
 function saveComm(){const draft=document.getElementById('commDraft').value.trim();if(!draft)return toast('Generate a draft first.');state.comms.unshift({id:uid('comm'),type:document.getElementById('commType').value,subject:document.getElementById('commSubject').value.trim(),draft,date:new Date().toISOString()});saveState();renderComms();toast('Communication saved.');}
 
 function renderIntelligence(){
-  document.getElementById('app').innerHTML=pageHead('Intelligence Workspace','Build a context-rich request from the Hub and hand it to your preferred AI workspace without a separate API key.')+
-  `<div class="grid g2"><div class="card"><label><span class="label">Focus</span><select id="intelFocus"><option>Full Hub</option><option>Curriculum & coverage</option><option>Lessons & planning</option><option>Assessment & marking</option><option>Learner support</option><option>Admin & communications</option><option>Resources</option></select></label><label><span class="label">Request</span><textarea id="intelPrompt" placeholder="Example: Create the next Ethical Hacking lesson without repeating what is already covered."></textarea></label><div class="toolbar"><button class="btn" onclick="RWH.prepareIntel()">Prepare intelligent request</button><button class="btn secondary" onclick="RWH.shareIntel()">Share</button><button class="btn ghost" onclick="RWH.copyIntel()">Copy</button></div><label><span class="label">Prepared request</span><textarea id="intelPrepared" style="min-height:320px" readonly></textarea></label></div>
-  <div class="card"><h3>Active context</h3><div id="intelContext">${renderIntelContext()}</div><h3 style="margin-top:16px">Response Vault</h3><textarea id="vaultInput" placeholder="Paste a completed response here to keep it with the Hub."></textarea><div class="toolbar"><button class="btn secondary" onclick="RWH.saveVault()">Save response</button></div>${state.vault.length?`<div class="list" style="margin-top:10px">${state.vault.slice(0,6).map(v=>`<div class="item"><div class="small muted">${new Date(v.date).toLocaleString('en-GB')}</div>${esc(v.text).slice(0,450)}</div>`).join('')}</div>`:'<div class="empty" style="margin-top:10px">No saved responses yet.</div>'}</div></div>`;
+  const pin=sessionStorage.getItem('rwh_ai_pin')||'';
+  const messages=state.aiMessages||[];
+  document.getElementById('app').innerHTML=pageHead('Hub Intelligence','Ask directly inside the Hub using your saved teaching and curriculum context.','<span class="pill green">GPT-5.6 Sol · High</span>')+
+  `<div class="ai-layout">
+    <section class="card ai-chat-card">
+      <div class="ai-chat-head">
+        <div><h3>Hub Assistant</h3><div class="small muted">Uses the relevant Hub context automatically. Your OpenAI key stays on the server.</div></div>
+        <button class="btn ghost smallbtn" onclick="RWH.clearAIChat()">Clear chat</button>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        ${messages.length?messages.map(m=>`<div class="ai-msg ${m.role==='assistant'?'assistant':'user'}"><div class="ai-role">${m.role==='assistant'?'Hub Intelligence':'You'}</div><div class="ai-text">${nl(m.content)}</div></div>`).join(''):`<div class="ai-welcome"><b>Ask anything about your teaching work.</b><span>Examples: “Create my next Programming Implementation lesson”, “Mark this work using WWW/EBI”, or “What specification content should I teach next?”</span></div>`}
+      </div>
+      <div class="ai-compose">
+        <textarea id="aiPrompt" placeholder="Ask the Hub..." onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter') RWH.sendAI()"></textarea>
+        <div class="ai-compose-row">
+          <select id="aiFocus"><option>Full Hub</option><option>Curriculum & coverage</option><option>Lessons & planning</option><option>Assessment & marking</option><option>Learner support</option><option>Admin & communications</option><option>Resources</option></select>
+          <select id="aiEffort"><option value="high">High reasoning</option><option value="medium">Medium reasoning</option><option value="xhigh">Extra high reasoning</option></select>
+          <button class="btn" id="aiSendBtn" onclick="RWH.sendAI()">Send</button>
+        </div>
+      </div>
+    </section>
+    <aside class="card ai-context-card">
+      <h3>Connection</h3>
+      <label><span class="label">Hub AI PIN</span><input id="aiPin" type="password" value="${esc(pin)}" placeholder="PIN set in Vercel"></label>
+      <div class="small muted">The PIN is kept only for this browser session. The OpenAI API key is never stored in this page.</div>
+      <h3 style="margin-top:16px">Active context</h3>
+      <div id="intelContext">${renderIntelContext()}</div>
+      <details style="margin-top:16px"><summary><b>Manual handoff fallback</b></summary>
+        <label><span class="label">Request</span><textarea id="intelPrompt"></textarea></label>
+        <select id="intelFocus"><option>Full Hub</option><option>Curriculum & coverage</option><option>Lessons & planning</option><option>Assessment & marking</option><option>Learner support</option><option>Admin & communications</option><option>Resources</option></select>
+        <div class="toolbar"><button class="btn secondary" onclick="RWH.prepareIntel()">Prepare</button><button class="btn ghost" onclick="RWH.copyIntel()">Copy</button></div>
+        <textarea id="intelPrepared" style="min-height:180px" readonly></textarea>
+      </details>
+    </aside>
+  </div>`;
+  setTimeout(()=>{const box=document.getElementById('aiMessages');if(box)box.scrollTop=box.scrollHeight;},0);
 }
 function renderIntelContext(){
   const ds=digitalCoverage(),tl=tlevelCoverage();
@@ -1014,6 +1048,43 @@ function openIntelligenceWith(prompt,focus){
   setTimeout(()=>{document.getElementById('intelFocus').value=focus||'Full Hub';document.getElementById('intelPrompt').value=prompt;prepareIntel();},0);
 }
 function saveVault(){const text=document.getElementById('vaultInput').value.trim();if(!text)return toast('Paste a response first.');state.vault.unshift({id:uid('vault'),date:new Date().toISOString(),text});saveState();renderIntelligence();toast('Response saved.');}
+
+async function sendAI(){
+  const input=document.getElementById('aiPrompt');
+  const message=input?.value.trim();
+  if(!message)return toast('Type a message first.');
+  const pin=(document.getElementById('aiPin')?.value||'').trim();
+  if(pin)sessionStorage.setItem('rwh_ai_pin',pin);
+  const focus=document.getElementById('aiFocus')?.value||'Full Hub';
+  const effort=document.getElementById('aiEffort')?.value||'high';
+  state.aiMessages=state.aiMessages||[];
+  state.aiMessages.push({role:'user',content:message,date:new Date().toISOString()});
+  saveState();
+  input.value='';
+  renderIntelligence();
+  const btn=document.getElementById('aiSendBtn');if(btn){btn.disabled=true;btn.textContent='Thinking…';}
+  try{
+    const history=state.aiMessages.slice(0,-1).slice(-10).map(m=>({role:m.role,content:m.content}));
+    const response=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-hub-key':pin},
+      body:JSON.stringify({message,focus,effort,history,context:intelSnapshot(focus)})
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data.error||'AI request failed.');
+    state.aiMessages.push({role:'assistant',content:data.text||'No response returned.',date:new Date().toISOString(),model:data.model||''});
+    saveState();
+    renderIntelligence();
+  }catch(err){
+    state.aiMessages.push({role:'assistant',content:'Connection error: '+(err.message||'Please try again.'),date:new Date().toISOString()});
+    saveState();
+    renderIntelligence();
+  }
+}
+function clearAIChat(){
+  if(!confirm('Clear the Hub Intelligence conversation on this browser?'))return;
+  state.aiMessages=[];saveState();renderIntelligence();toast('Chat cleared.');
+}
 
 function renderSettings(){
   document.getElementById('app').innerHTML=pageHead('Settings','Teaching standards, backup and reliability controls.','<span class="pill green">Version '+esc(D.version)+'</span>')+
@@ -1047,7 +1118,7 @@ Object.assign(window.RWH,{
   addLearner,filterLearners,deleteLearner,startOneToOne,startProgression,
   renderAttendanceRows,saveAttendance,saveOneToOne,saveProgression,
   addTask,toggleTask,addTimetable,addRoomIssue,addEmployer,addResource,filterResources,
-  generateComm,copyComm,saveComm,prepareIntel,shareIntel,copyIntel,saveVault,
+  generateComm,copyComm,saveComm,prepareIntel,shareIntel,copyIntel,saveVault,sendAI,clearAIChat,
   saveSettings,resetStyle,exportBackup,importBackup,resetAll,selfCheck
 });
 
