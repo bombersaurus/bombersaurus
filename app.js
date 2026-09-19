@@ -9,7 +9,7 @@ const C2 = D.courses.tlevel.name;
 
 const NAV = [
   ['WORKSPACE',[
-    ['dashboard','Dashboard'],['curriculum','Curriculum'],['specs','Specifications'],['lesson','Lesson Studio'],['intelligence','Intelligence']
+    ['dashboard','Dashboard'],['curriculum','Curriculum'],['specs','Specifications'],['lesson','Lesson Studio'],['intelligence','Ask Intelligence']
   ]],
   ['ASSESSMENT',[
     ['esp','Employer Set Project'],['assessmentPlanner','Assessment Planner'],['marking','Mark Work'],['briefs','Assignment Briefs']
@@ -678,8 +678,8 @@ function hubSearch(query){
   const answer=nextIntent?'<div class="note"><b>Suggested next:</b><br>'+esc(C1)+': '+esc(getSuggestedNext('digitalSkills'))+'<br>'+esc(C2)+': '+esc(getSuggestedNext('tlevel'))+'</div>':'';
   modal('<div class="card-title"><h2>Hub search</h2><button class="btn ghost smallbtn" onclick="closeModal()">Close</button></div>'+
     '<p class="muted">Query: '+esc(q)+'</p>'+answer+
-    (hits.length?'<div class="list" style="margin-top:12px">'+hits.slice(0,14).map(h=>'<div class="item"><span class="pill gray">'+esc(h.type)+'</span><b style="display:block;margin-top:5px">'+esc(h.title)+'</b><div class="small muted">'+esc(h.detail)+'</div><div class="toolbar"><button class="btn ghost smallbtn" onclick="closeModal();'+h.action+'">Open</button></div></div>').join('')+'</div>':'<div class="empty">No direct stored match. Use the intelligent request button below to work across your Hub context.</div>')+
-    '<div class="toolbar"><button class="btn" onclick="closeModal();RWH.openIntelligenceSearch('+JSON.stringify(q)+')">Use Intelligence Workspace</button></div>');
+    (hits.length?'<div class="list" style="margin-top:12px">'+hits.slice(0,14).map(h=>'<div class="item"><span class="pill gray">'+esc(h.type)+'</span><b style="display:block;margin-top:5px">'+esc(h.title)+'</b><div class="small muted">'+esc(h.detail)+'</div><div class="toolbar"><button class="btn ghost smallbtn" onclick="closeModal();'+h.action+'">Open</button></div></div>').join('')+'</div>':'<div class="empty">No direct stored match. Use Ask Intelligence below to work across your Hub context.</div>')+
+    '<div class="toolbar"><button class="btn" onclick="closeModal();RWH.openIntelligenceSearch('+JSON.stringify(q)+')">Ask Intelligence</button></div>');
 }
 function openIntelligenceSearch(q){ openIntelligenceWith(q,'Full Hub'); }
 
@@ -985,42 +985,51 @@ function copyComm(){const t=document.getElementById('commDraft').value;if(!t)ret
 function saveComm(){const draft=document.getElementById('commDraft').value.trim();if(!draft)return toast('Generate a draft first.');state.comms.unshift({id:uid('comm'),type:document.getElementById('commType').value,subject:document.getElementById('commSubject').value.trim(),draft,date:new Date().toISOString()});saveState();renderComms();toast('Communication saved.');}
 
 function renderIntelligence(){
-  const pin=sessionStorage.getItem('rwh_ai_pin')||'';
-  const messages=state.aiMessages||[];
-  document.getElementById('app').innerHTML=pageHead('Hub Intelligence','Ask directly inside the Hub using your saved teaching and curriculum context.','<span class="pill green">GPT-5.6 Sol · High</span>')+
-  `<div class="ai-layout">
-    <section class="card ai-chat-card">
-      <div class="ai-chat-head">
-        <div><h3>Hub Assistant</h3><div class="small muted">Uses the relevant Hub context automatically. Your OpenAI key stays on the server.</div></div>
-        <button class="btn ghost smallbtn" onclick="RWH.clearAIChat()">Clear chat</button>
+  document.getElementById('app').innerHTML=pageHead(
+    'Ask Intelligence',
+    'Use your existing Plus account with the relevant Hub context prepared automatically.',
+    '<span class="pill green">No API required</span>'
+  )+
+  `<div class="grid g2">
+    <section class="card">
+      <h3>What do you need?</h3>
+      <p class="small muted">Ask naturally. The Hub will add your teaching style, curriculum, specification coverage and relevant workspace information.</p>
+      <label><span class="label">Focus</span>
+        <select id="intelFocus">
+          <option>Full Hub</option>
+          <option>Curriculum & coverage</option>
+          <option>Lessons & planning</option>
+          <option>Assessment & marking</option>
+          <option>Learner support</option>
+          <option>Admin & communications</option>
+          <option>Resources</option>
+        </select>
+      </label>
+      <label><span class="label">Request</span>
+        <textarea id="intelPrompt" style="min-height:150px" placeholder="Example: Create my next Programming Implementation lesson without repeating content already covered."></textarea>
+      </label>
+      <div class="toolbar">
+        <button class="btn" onclick="RWH.askIntelligence()">Ask Intelligence</button>
+        <button class="btn secondary" onclick="RWH.prepareIntel()">Preview prepared context</button>
+        <button class="btn ghost" onclick="RWH.copyIntel()">Copy</button>
       </div>
-      <div class="ai-messages" id="aiMessages">
-        ${messages.length?messages.map(m=>`<div class="ai-msg ${m.role==='assistant'?'assistant':'user'}"><div class="ai-role">${m.role==='assistant'?'Hub Intelligence':'You'}</div><div class="ai-text">${nl(m.content)}</div></div>`).join(''):`<div class="ai-welcome"><b>Ask anything about your teaching work.</b><span>Examples: “Create my next Programming Implementation lesson”, “Mark this work using WWW/EBI”, or “What specification content should I teach next?”</span></div>`}
-      </div>
-      <div class="ai-compose">
-        <textarea id="aiPrompt" placeholder="Ask the Hub..." onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter') RWH.sendAI()"></textarea>
-        <div class="ai-compose-row">
-          <select id="aiFocus"><option>Full Hub</option><option>Curriculum & coverage</option><option>Lessons & planning</option><option>Assessment & marking</option><option>Learner support</option><option>Admin & communications</option><option>Resources</option></select>
-          <select id="aiEffort"><option value="high">High reasoning</option><option value="medium">Medium reasoning</option><option value="xhigh">Extra high reasoning</option></select>
-          <button class="btn" id="aiSendBtn" onclick="RWH.sendAI()">Send</button>
-        </div>
-      </div>
+      <label><span class="label">Prepared Hub context</span>
+        <textarea id="intelPrepared" style="min-height:300px" readonly placeholder="Your prepared request will appear here."></textarea>
+      </label>
     </section>
-    <aside class="card ai-context-card">
-      <h3>Connection</h3>
-      <label><span class="label">Hub AI PIN</span><input id="aiPin" type="password" value="${esc(pin)}" placeholder="PIN set in Vercel"></label>
-      <div class="small muted">The PIN is kept only for this browser session. The OpenAI API key is never stored in this page.</div>
-      <h3 style="margin-top:16px">Active context</h3>
+    <aside class="card">
+      <h3>Active Hub context</h3>
       <div id="intelContext">${renderIntelContext()}</div>
-      <details style="margin-top:16px"><summary><b>Manual handoff fallback</b></summary>
-        <label><span class="label">Request</span><textarea id="intelPrompt"></textarea></label>
-        <select id="intelFocus"><option>Full Hub</option><option>Curriculum & coverage</option><option>Lessons & planning</option><option>Assessment & marking</option><option>Learner support</option><option>Admin & communications</option><option>Resources</option></select>
-        <div class="toolbar"><button class="btn secondary" onclick="RWH.prepareIntel()">Prepare</button><button class="btn ghost" onclick="RWH.copyIntel()">Copy</button></div>
-        <textarea id="intelPrepared" style="min-height:180px" readonly></textarea>
-      </details>
+      <div class="note" style="margin-top:14px">
+        <b>How Ask Intelligence works</b><br>
+        It prepares the relevant Hub context, copies it to your device, then opens your existing AI workspace. Paste once and continue there using your normal subscription.
+      </div>
+      <h3 style="margin-top:16px">Response Vault</h3>
+      <textarea id="vaultInput" placeholder="Paste a useful response here if you want to keep it with the Hub."></textarea>
+      <div class="toolbar"><button class="btn secondary" onclick="RWH.saveVault()">Save response</button></div>
+      ${state.vault.length?`<div class="list" style="margin-top:10px">${state.vault.slice(0,6).map(v=>`<div class="item"><div class="small muted">${new Date(v.date).toLocaleString('en-GB')}</div>${esc(v.text).slice(0,450)}</div>`).join('')}</div>`:'<div class="empty" style="margin-top:10px">No saved responses yet.</div>'}
     </aside>
   </div>`;
-  setTimeout(()=>{const box=document.getElementById('aiMessages');if(box)box.scrollTop=box.scrollHeight;},0);
 }
 function renderIntelContext(){
   const ds=digitalCoverage(),tl=tlevelCoverage();
@@ -1043,48 +1052,33 @@ function prepareIntel(){
 }
 async function shareIntel(){let t=document.getElementById('intelPrepared').value;if(!t){prepareIntel();t=document.getElementById('intelPrepared').value;}if(!t)return;if(navigator.share){try{await navigator.share({title:'Rabiul Work Hub request',text:t});return;}catch(e){}}copyText(t);}
 function copyIntel(){const t=document.getElementById('intelPrepared').value;if(!t)return toast('Prepare a request first.');copyText(t);}
+async function askIntelligence(){
+  const prompt=document.getElementById('intelPrompt')?.value.trim();
+  if(!prompt)return toast('Add a request first.');
+  prepareIntel();
+  const prepared=document.getElementById('intelPrepared')?.value||'';
+  if(!prepared)return;
+  let copied=false;
+  try{
+    await navigator.clipboard.writeText(prepared);
+    copied=true;
+  }catch(e){
+    const box=document.getElementById('intelPrepared');
+    if(box){box.focus();box.select();}
+  }
+  const opened=window.open('https://chatgpt.com/','_blank','noopener,noreferrer');
+  if(opened){
+    toast(copied?'Intelligence context copied — paste it in the new window.':'New window opened — copy the prepared context and paste it.');
+  }else{
+    toast(copied?'Intelligence context copied. Open your AI workspace and paste it.':'Copy the prepared context, then open your AI workspace.');
+  }
+}
+
 function openIntelligenceWith(prompt,focus){
   ui.page='intelligence'; render();
   setTimeout(()=>{document.getElementById('intelFocus').value=focus||'Full Hub';document.getElementById('intelPrompt').value=prompt;prepareIntel();},0);
 }
 function saveVault(){const text=document.getElementById('vaultInput').value.trim();if(!text)return toast('Paste a response first.');state.vault.unshift({id:uid('vault'),date:new Date().toISOString(),text});saveState();renderIntelligence();toast('Response saved.');}
-
-async function sendAI(){
-  const input=document.getElementById('aiPrompt');
-  const message=input?.value.trim();
-  if(!message)return toast('Type a message first.');
-  const pin=(document.getElementById('aiPin')?.value||'').trim();
-  if(pin)sessionStorage.setItem('rwh_ai_pin',pin);
-  const focus=document.getElementById('aiFocus')?.value||'Full Hub';
-  const effort=document.getElementById('aiEffort')?.value||'high';
-  state.aiMessages=state.aiMessages||[];
-  state.aiMessages.push({role:'user',content:message,date:new Date().toISOString()});
-  saveState();
-  input.value='';
-  renderIntelligence();
-  const btn=document.getElementById('aiSendBtn');if(btn){btn.disabled=true;btn.textContent='Thinking…';}
-  try{
-    const history=state.aiMessages.slice(0,-1).slice(-10).map(m=>({role:m.role,content:m.content}));
-    const response=await fetch('/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-hub-key':pin},
-      body:JSON.stringify({message,focus,effort,history,context:intelSnapshot(focus)})
-    });
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(data.error||'AI request failed.');
-    state.aiMessages.push({role:'assistant',content:data.text||'No response returned.',date:new Date().toISOString(),model:data.model||''});
-    saveState();
-    renderIntelligence();
-  }catch(err){
-    state.aiMessages.push({role:'assistant',content:'Connection error: '+(err.message||'Please try again.'),date:new Date().toISOString()});
-    saveState();
-    renderIntelligence();
-  }
-}
-function clearAIChat(){
-  if(!confirm('Clear the Hub Intelligence conversation on this browser?'))return;
-  state.aiMessages=[];saveState();renderIntelligence();toast('Chat cleared.');
-}
 
 function renderSettings(){
   document.getElementById('app').innerHTML=pageHead('Settings','Teaching standards, backup and reliability controls.','<span class="pill green">Version '+esc(D.version)+'</span>')+
@@ -1118,7 +1112,7 @@ Object.assign(window.RWH,{
   addLearner,filterLearners,deleteLearner,startOneToOne,startProgression,
   renderAttendanceRows,saveAttendance,saveOneToOne,saveProgression,
   addTask,toggleTask,addTimetable,addRoomIssue,addEmployer,addResource,filterResources,
-  generateComm,copyComm,saveComm,prepareIntel,shareIntel,copyIntel,saveVault,sendAI,clearAIChat,
+  generateComm,copyComm,saveComm,prepareIntel,shareIntel,copyIntel,saveVault,askIntelligence,
   saveSettings,resetStyle,exportBackup,importBackup,resetAll,selfCheck
 });
 
