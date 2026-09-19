@@ -185,3 +185,24 @@ tr:last-child td{border-bottom:0}
  .slide-stage{background:white;padding:0}
  .slide{page-break-after:always;box-shadow:none;border:0;width:100%;height:auto;aspect-ratio:16/9}
 }
+
+/* Hub Intelligence chat */
+.ai-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.7fr);gap:14px;align-items:start}
+.ai-chat-card{padding:0;overflow:hidden}
+.ai-chat-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;border-bottom:1px solid var(--line)}
+.ai-chat-head h3{margin:0 0 3px}
+.ai-messages{height:min(62vh,620px);min-height:420px;overflow:auto;padding:18px;background:#f8fafc;display:flex;flex-direction:column;gap:12px}
+.ai-msg{max-width:86%;padding:12px 14px;border-radius:14px;box-shadow:0 2px 8px rgba(16,24,40,.05)}
+.ai-msg.user{align-self:flex-end;background:#172033;color:#fff;border-bottom-right-radius:5px}
+.ai-msg.assistant{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:5px}
+.ai-role{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.72;margin-bottom:5px}
+.ai-text{font-size:14px;line-height:1.55;white-space:normal}
+.ai-welcome{margin:auto;max-width:520px;text-align:center;color:var(--muted);display:grid;gap:8px}
+.ai-welcome b{font-size:18px;color:var(--ink)}
+.ai-compose{padding:14px;border-top:1px solid var(--line);background:#fff}
+.ai-compose textarea{min-height:92px}
+.ai-compose-row{display:grid;grid-template-columns:1fr 180px auto;gap:8px;align-items:center;margin-top:8px}
+.ai-context-card details{border-top:1px solid var(--line);padding-top:12px}
+.ai-context-card summary{cursor:pointer}
+@media(max-width:1000px){.ai-layout{grid-template-columns:1fr}.ai-context-card{order:2}}
+@media(max-width:700px){.ai-messages{min-height:360px;height:52vh;padding:12px}.ai-msg{max-width:94%}.ai-compose-row{grid-template-columns:1fr}.ai-compose-row .btn{width:100%}}
