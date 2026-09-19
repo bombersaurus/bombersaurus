@@ -12,7 +12,7 @@ const NAV = [
     ['dashboard','Dashboard'],['curriculum','Curriculum'],['specs','Specifications'],['lesson','Lesson Studio'],['intelligence','Intelligence']
   ]],
   ['ASSESSMENT',[
-    ['marking','Mark Work'],['briefs','Assignment Briefs']
+    ['esp','Employer Set Project'],['assessmentPlanner','Assessment Planner'],['marking','Mark Work'],['briefs','Assignment Briefs']
   ]],
   ['LEARNERS',[
     ['learners','Learners'],['attendance','Attendance'],['oneToOnes','1:1s'],['progression','Progression']
@@ -36,6 +36,8 @@ const DEFAULT_STATE = () => ({
   lessons: [],
   marking: [],
   briefs: [],
+  assessments: [],
+  espItems: [],
   tasks: [],
   learners: [],
   attendance: [],
@@ -94,7 +96,7 @@ function migrate(s){
   s = Object.assign(base,s||{});
   s.prefs = Object.assign(base.prefs,s.prefs||{});
   ['coverage'].forEach(k=>{ if(!s[k] || typeof s[k] !== 'object') s[k]={}; });
-  ['lessons','marking','briefs','tasks','learners','attendance','oneToOnes','progression','timetable','rooms','employers','resources','comms','vault']
+  ['lessons','marking','briefs','assessments','espItems','tasks','learners','attendance','oneToOnes','progression','timetable','rooms','employers','resources','comms','vault']
     .forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; });
   s.schema = SCHEMA;
   return s;
@@ -144,14 +146,20 @@ function renderNav(){
   document.getElementById('mobilebar').innerHTML=mobile.map(([id,label])=>`<button data-page="${id}" class="${ui.page===id?'active':''}" onclick="RWH.go('${id}')">${label}</button>`).join('');
 }
 function pageHead(title,subtitle,right=''){
-  return `<div class="page-head"><div><button class="drawer-btn" onclick="RWH.toggleDrawer()">Menu</button><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>${right||''}</div>`;
+  return `<div class="page-head"><div><button class="drawer-btn" onclick="RWH.toggleDrawer()">Menu</button><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>${right||''}</div>
+  <div class="card" style="padding:10px 12px;margin-bottom:14px;box-shadow:none">
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="search-box" style="flex:1"><input id="hubGlobalSearch" placeholder="Search the Hub or ask: what should I teach next?" onkeydown="if(event.key==='Enter') RWH.hubSearch(this.value)"></div>
+      <button class="btn secondary" onclick="RWH.hubSearch(document.getElementById('hubGlobalSearch').value)">Search / Ask</button>
+    </div>
+  </div>`;
 }
 function render(){
   renderNav();
   document.body.classList.remove('drawer-open');
   const fn = {
     dashboard:renderDashboard,curriculum:renderCurriculum,specs:renderSpecs,lesson:renderLesson,
-    intelligence:renderIntelligence,marking:renderMarking,briefs:renderBriefs,learners:renderLearners,
+    intelligence:renderIntelligence,esp:renderESP,assessmentPlanner:renderAssessmentPlanner,marking:renderMarking,briefs:renderBriefs,learners:renderLearners,
     attendance:renderAttendance,oneToOnes:renderOneToOnes,progression:renderProgression,planner:renderPlanner,
     timetable:renderTimetable,rooms:renderRooms,employers:renderEmployers,resources:renderResources,
     comms:renderComms,settings:renderSettings
@@ -623,6 +631,85 @@ function loadLesson(id){
 function newLesson(){ ui.currentSlides=[]; ui.selectedSlide=0; ui.lessonPromptHistory=[]; renderLesson(); }
 function printLesson(){ if(!ui.currentSlides.length)return toast('Generate a lesson first.'); window.print(); }
 
+
+function hubSearch(query){
+  const q=(query||'').trim();
+  if(!q) return toast('Type something to search or ask.');
+  const low=q.toLowerCase();
+  const hits=[];
+  D.courses.digitalSkills.units.forEach(u=>{
+    if((u.title+' '+u.code+' '+u.aim+' '+u.topics.join(' ')).toLowerCase().includes(low)) hits.push({type:'Digital Skills unit',title:u.title,detail:u.code,action:"RWH.openSpec('"+u.id+"')"});
+    u.criteria.forEach(c=>{if((c.code+' '+c.text).toLowerCase().includes(low))hits.push({type:'Specification criterion',title:u.title+' '+c.code,detail:c.text,action:"RWH.openSpec('"+u.id+"')"});});
+  });
+  D.courses.tlevel.core.forEach(a=>{if((a.title+' '+(a.topics||[]).join(' ')).toLowerCase().includes(low))hits.push({type:'T Level Core',title:a.title,detail:(a.count||0)+' numbered specification points',action:"RWH.openSpec('"+a.id+"')"});});
+  D.courses.tlevel.os.forEach(a=>{if(a.title.toLowerCase().includes(low))hits.push({type:'Occupational Specialism',title:a.title,detail:'T Level Digital Software Development',action:"RWH.openSpec('"+a.id+"')"});});
+  state.lessons.forEach(x=>{if((x.topic+' '+x.areaTitle).toLowerCase().includes(low))hits.push({type:'Saved lesson',title:x.topic,detail:x.courseName||'',action:"RWH.loadLesson('"+x.id+"')"});});
+  state.tasks.forEach(x=>{if((x.text||'').toLowerCase().includes(low))hits.push({type:'Planner task',title:x.text,detail:fmtDate(x.date),action:"RWH.go('planner')"});});
+  state.learners.forEach(x=>{if((x.ref+' '+(x.strengths||'')+' '+(x.support||'')).toLowerCase().includes(low))hits.push({type:'Learner record',title:x.ref,detail:x.support||x.strengths||'',action:"RWH.go('learners')"});});
+  state.resources.forEach(x=>{if((x.title+' '+x.type+' '+(x.notes||'')).toLowerCase().includes(low))hits.push({type:'Resource',title:x.title,detail:x.type,action:"RWH.go('resources')"});});
+  state.rooms.forEach(x=>{if((x.room+' '+x.issue+' '+x.type).toLowerCase().includes(low))hits.push({type:'Room / equipment',title:x.room+' · '+x.type,detail:x.issue,action:"RWH.go('rooms')"});});
+  state.employers.forEach(x=>{if((x.name+' '+x.type+' '+(x.details||'')).toLowerCase().includes(low))hits.push({type:'Employer engagement',title:x.name,detail:x.details||x.type,action:"RWH.go('employers')"});});
+  const nextIntent=/next lesson|teach next|what next|next topic/.test(low);
+  const answer=nextIntent?'<div class="note"><b>Suggested next:</b><br>'+esc(C1)+': '+esc(getSuggestedNext('digitalSkills'))+'<br>'+esc(C2)+': '+esc(getSuggestedNext('tlevel'))+'</div>':'';
+  modal('<div class="card-title"><h2>Hub search</h2><button class="btn ghost smallbtn" onclick="closeModal()">Close</button></div>'+
+    '<p class="muted">Query: '+esc(q)+'</p>'+answer+
+    (hits.length?'<div class="list" style="margin-top:12px">'+hits.slice(0,14).map(h=>'<div class="item"><span class="pill gray">'+esc(h.type)+'</span><b style="display:block;margin-top:5px">'+esc(h.title)+'</b><div class="small muted">'+esc(h.detail)+'</div><div class="toolbar"><button class="btn ghost smallbtn" onclick="closeModal();'+h.action+'">Open</button></div></div>').join('')+'</div>':'<div class="empty">No direct stored match. Use the intelligent request button below to work across your Hub context.</div>')+
+    '<div class="toolbar"><button class="btn" onclick="closeModal();RWH.openIntelligenceSearch('+JSON.stringify(q)+')">Use Intelligence Workspace</button></div>');
+}
+function openIntelligenceSearch(q){ openIntelligenceWith(q,'Full Hub'); }
+
+function renderESP(){
+  const esp=D.courses.tlevel.assessment.find(x=>x.name==='Employer Set Project')||{duration:'14h 30m',marks:100,weight:'40%'};
+  const items=[...state.espItems].sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
+  document.getElementById('app').innerHTML=pageHead('Employer Set Project','Plan preparation, formative checkpoints and delivery without mixing it up with the Core exams.')+
+  '<div class="grid g2">'+
+    '<div class="card"><span class="pill blue">T Level Core component</span><h2 style="margin:9px 0 4px">Employer Set Project</h2><div class="grid g3" style="margin-top:12px"><div class="item"><div class="muted small">Duration</div><b>'+esc(esp.duration)+'</b></div><div class="item"><div class="muted small">Marks</div><b>'+esc(esp.marks)+'</b></div><div class="item"><div class="muted small">Core weighting</div><b>'+esc(esp.weight)+'</b></div></div><div class="note" style="margin-top:12px">Use this area for preparation and internal planning. Keep official live assessment materials and controlled conditions separate from teaching resources.</div></div>'+
+    '<div class="card"><h3>Add ESP checkpoint</h3><div class="form-grid"><label><span class="label">Checkpoint / activity</span><input id="espTitle" placeholder="e.g. Task 1 formative recap"></label><label><span class="label">Planned date</span><input id="espDate" type="date"></label><label><span class="label">Status</span><select id="espStatus"><option>Planned</option><option>In progress</option><option>Complete</option><option>Needs follow-up</option></select></label><label><span class="label">Focus</span><select id="espFocus"><option>Problem solving</option><option>Research / sources</option><option>Planning</option><option>Communication</option><option>Solution development</option><option>Evaluation</option></select></label><label class="full"><span class="label">Notes / learner preparation</span><textarea id="espNotes"></textarea></label></div><div class="toolbar"><button class="btn" onclick="RWH.addESPItem()">Add checkpoint</button><button class="btn secondary" onclick="RWH.prepareESPRequest()">Prepare planning request</button></div></div>'+
+  '</div>'+
+  '<div class="card" style="margin-top:14px"><div class="card-title"><h3>ESP plan</h3><span class="pill gray">'+items.length+' items</span></div>'+
+    (items.length?'<div class="table-wrap"><table><thead><tr><th>Date</th><th>Checkpoint</th><th>Focus</th><th>Status</th><th>Notes</th></tr></thead><tbody>'+items.map(x=>'<tr><td>'+fmtDate(x.date)+'</td><td><b>'+esc(x.title)+'</b></td><td>'+esc(x.focus)+'</td><td><span class="pill '+(x.status==='Complete'?'green':x.status==='Needs follow-up'?'red':'gray')+'">'+esc(x.status)+'</span></td><td>'+esc(x.notes||'')+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty">No ESP checkpoints saved yet.</div>')+
+  '</div>';
+}
+function addESPItem(){
+  const title=document.getElementById('espTitle').value.trim(); if(!title) return toast('Add a checkpoint title.');
+  state.espItems.unshift({id:uid('esp'),title,date:document.getElementById('espDate').value,status:document.getElementById('espStatus').value,focus:document.getElementById('espFocus').value,notes:document.getElementById('espNotes').value.trim(),created:new Date().toISOString()});
+  saveState(); renderESP(); toast('ESP checkpoint added.');
+}
+function prepareESPRequest(){
+  openIntelligenceWith('Help me plan the next Employer Set Project preparation session. Use my existing ESP checkpoints, T Level Core coverage and teaching style. Keep official controlled assessment separate from formative teaching and do not invent live assessment material.','Curriculum & coverage');
+}
+
+function renderAssessmentPlanner(){
+  const rows=[...state.assessments].sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
+  const courseId='digitalSkills';
+  document.getElementById('app').innerHTML=pageHead('Assessment Planner','Track issue dates, deadlines, mocks, formative assessments and resubmissions across both courses.')+
+  '<div class="grid g2"><div class="card"><div class="form-grid">'+
+    '<label><span class="label">Course</span><select id="assCourse" onchange="RWH.assessmentCourseChanged()"><option value="digitalSkills">'+esc(C1)+'</option><option value="tlevel">'+esc(C2)+'</option></select></label>'+
+    '<label><span class="label">Unit / content area</span><select id="assArea">'+lessonAreaOptions(courseId,allCourseAreas(courseId)[0].id)+'</select></label>'+
+    '<label><span class="label">Assessment title</span><input id="assTitle" placeholder="e.g. Programming Implementation Task 1"></label>'+
+    '<label><span class="label">Type</span><select id="assType"><option>Assignment</option><option>Formative assessment</option><option>Mock</option><option>Resubmission</option><option>Practical evidence</option><option>Exam preparation</option></select></label>'+
+    '<label><span class="label">Issue / start date</span><input id="assStart" type="date"></label><label><span class="label">Due / assessment date</span><input id="assDue" type="date"></label>'+
+    '<label><span class="label">Status</span><select id="assStatus"><option>Planned</option><option>Issued</option><option>Marking</option><option>Feedback given</option><option>Complete</option></select></label>'+
+    '<label><span class="label">Priority</span><select id="assPriority"><option>Normal</option><option>High</option><option>Critical date</option></select></label>'+
+    '<label class="full"><span class="label">Notes</span><textarea id="assNotes"></textarea></label>'+
+    '</div><div class="toolbar"><button class="btn" onclick="RWH.addAssessment()">Add assessment</button></div></div>'+
+    '<div class="card"><h3>Assessment overview</h3><div class="grid g3" style="margin-top:10px"><div class="item"><div class="muted small">Planned / issued</div><b>'+rows.filter(x=>['Planned','Issued'].includes(x.status)).length+'</b></div><div class="item"><div class="muted small">Marking</div><b>'+rows.filter(x=>x.status==='Marking').length+'</b></div><div class="item"><div class="muted small">Complete</div><b>'+rows.filter(x=>x.status==='Complete').length+'</b></div></div><div class="note" style="margin-top:12px">Use the planner for your delivery schedule. Official external assessment dates and controlled conditions should still be checked against the current awarding-body / exams-team information.</div></div></div>'+
+  '<div class="card" style="margin-top:14px">'+
+    (rows.length?'<div class="table-wrap"><table><thead><tr><th>Due</th><th>Assessment</th><th>Course / area</th><th>Type</th><th>Status</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+fmtDate(x.due)+'</td><td><b>'+esc(x.title)+'</b><div class="small muted">Start: '+fmtDate(x.start)+'</div></td><td>'+esc(course(x.courseId)?.name||'')+'<div class="small muted">'+esc(areaById(x.courseId,x.areaId)?.title||'')+'</div></td><td>'+esc(x.type)+'</td><td><span class="pill '+(x.status==='Complete'?'green':x.priority==='Critical date'?'red':'gray')+'">'+esc(x.status)+'</span></td></tr>').join('')+'</tbody></table></div>':'<div class="empty">No assessments planned yet.</div>')+
+  '</div>';
+}
+function assessmentCourseChanged(){
+  const cid=document.getElementById('assCourse').value;
+  const a=allCourseAreas(cid);
+  document.getElementById('assArea').innerHTML=lessonAreaOptions(cid,a[0].id);
+}
+function addAssessment(){
+  const title=document.getElementById('assTitle').value.trim(); if(!title) return toast('Add an assessment title.');
+  const courseId=document.getElementById('assCourse').value;
+  state.assessments.unshift({id:uid('ass'),courseId,areaId:document.getElementById('assArea').value,title,type:document.getElementById('assType').value,start:document.getElementById('assStart').value,due:document.getElementById('assDue').value,status:document.getElementById('assStatus').value,priority:document.getElementById('assPriority').value,notes:document.getElementById('assNotes').value.trim(),created:new Date().toISOString()});
+  saveState(); renderAssessmentPlanner(); toast('Assessment added.');
+}
+
 function renderMarking(){
   const areas=allCourseAreas(ui.course);
   const areaId=ui.specUnitId && areas.some(a=>a.id===ui.specUnitId)?ui.specUnitId:areas[0].id;
@@ -928,8 +1015,9 @@ function selfCheck(){
 }
 
 Object.assign(window.RWH,{
-  openCourse,planSuggested,setCourse,openSpec,toggleCoverage,specCourseChanged,filterSpecs,selectSpec,planArea,
+  openCourse,planSuggested,setCourse,openSpec,toggleCoverage,specCourseChanged,filterSpecs,selectSpec,planArea,hubSearch,openIntelligenceSearch,
   lessonCourseChanged,lessonAreaChanged,generateLesson,selectSlide,updateSelectedSlide,deleteSelectedSlide,addImprovePrompt,improveLesson,saveLesson,loadLesson,newLesson,printLesson,
+  addESPItem,prepareESPRequest,assessmentCourseChanged,addAssessment,
   markCourseChanged,markAreaChanged,generateFeedback,copyFeedback,saveMarking,prepareMarkingRequest,
   briefCourseChanged,briefAreaChanged,generateBrief,saveBrief,
   addLearner,filterLearners,deleteLearner,startOneToOne,startProgression,
