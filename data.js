@@ -16,6 +16,38 @@ window.RWH_DATA = {
         "Problem Solving",
         "Professional Practice and Communication"
       ],
+      deliveryAreas: [
+        {
+          id:"ethical-hacking", title:"Ethical Hacking", source:"Scheme of Learning",
+          note:"Delivery area in the Oldham College Scheme of Learning. Do not treat it as a criterion from the uploaded Gateway extract.",
+          topics:["Role and purpose of ethical hacking","Authorisation and scope","Identification of vulnerabilities","Penetration testing","Physical, logical and social engineering techniques","IDS, IPS and honeypots","Encryption and security testing","Reporting, vetting and professional conduct"]
+        },
+        {
+          id:"networking", title:"Networking", source:"Scheme of Learning",
+          note:"Delivery area in the Oldham College Scheme of Learning. Do not treat it as a criterion from the uploaded Gateway extract.",
+          topics:["LAN, WAN, PAN and internet networks","Servers, switches and routers","Network topologies","Protocols and services","IP addressing","Wireless standards and security","Network troubleshooting"]
+        },
+        {
+          id:"data-communication", title:"Data Communication", source:"Scheme of Learning",
+          note:"Delivery area in the Oldham College Scheme of Learning. Do not treat it as a criterion from the uploaded Gateway extract.",
+          topics:["Communication devices","Transmission media","Data transmission","Protocols","Wired and wireless communication","Performance, reliability and security"]
+        },
+        {
+          id:"access-control", title:"Access Control", source:"Scheme of Learning",
+          note:"Delivery area in the Oldham College Scheme of Learning. Do not treat it as a criterion from the uploaded Gateway extract.",
+          topics:["Confidentiality, integrity and availability","Authentication and authorisation","Role-based access control","Multi-factor authentication","Passwordless authentication","Physical access controls","Cloud identity and access"]
+        },
+        {
+          id:"network-project", title:"Network Project", source:"Scheme of Learning",
+          note:"Applied project delivery area in the Scheme of Learning.",
+          topics:["Business case","Stakeholders","Objectives","Scope and constraints","Risks","Resources and deliverables","Monitoring and progress tracking","Post-project review"]
+        },
+        {
+          id:"software-project-management", title:"Software Project Management", source:"Scheme of Learning",
+          note:"Applied software project delivery area in the Scheme of Learning.",
+          topics:["Waterfall","Agile","Rapid Application Development","PRINCE2","Gantt planning","Monitoring and variance","Stakeholder feedback","Project evaluation"]
+        }
+      ],
       units: [
         {
           id:"project-management", title:"Project Management", code:"F/618/5180", glh:42, credits:6,
