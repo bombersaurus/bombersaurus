@@ -1,36 +1,943 @@
-(()=>{
-"use strict";
-const D=window.RWH_DATA,$=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)],K="rwh3";
-const def={coverage:{},lessons:[],tasks:[],learners:[],marks:[],style:(D.defaultTeachingStyle||[]).join("\n"),draft:null};
-let S;try{S=Object.assign({},def,JSON.parse(localStorage.getItem(K)||"{}"))}catch(_){S={...def}}
-const save=()=>localStorage.setItem(K,JSON.stringify(S)),esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const C=id=>D.courses[id],U=id=>id==="digitalSkills"?C(id).units:C(id).core;
-let page="dashboard",cid="digitalSkills",uid="programming-implementation",si=0;
-const nav=[["dashboard","Dashboard"],["today","Today"],["courses","Curriculum"],["specs","Specifications & Coverage"],["lesson","Lesson Studio"],["mark","Mark Work"],["briefs","Assignment Briefs"],["assessment","Assessment Planner"],["learners","Learners"],["support","Attendance & Interventions"],["one2one","One-to-Ones"],["progression","Progression & Transfers"],["planner","Weekly Planner"],["rooms","Rooms & Equipment"],["employers","Employer Engagement"],["intel","Intelligence"],["settings","Settings"]];
-const btn=(t,a,p=false)=>'<button class="btn '+(p?"primary":"secondary")+'" data-act="'+a+'">'+t+'</button>';
-const head=(t,s,b="")=>'<div class="page-head"><div><h1>'+t+'</h1><p>'+s+'</p></div>'+(b?'<span class="status">'+b+'</span>':"")+'</div>';
-const card=(t,b)=>'<section class="card"><h3>'+t+'</h3>'+b+'</section>';
-const toast=t=>{let e=$("#toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),1600)};
-function renderNav(){$("#nav").innerHTML=nav.map(n=>'<button data-page="'+n[0]+'" class="'+(page===n[0]?"active":"")+'">'+n[1]+'</button>').join("");$("#mobilebar").innerHTML=[["dashboard","Home"],["today","Today"],["lesson","Lesson"],["specs","Specs"],["settings","More"]].map(n=>'<button data-page="'+n[0]+'" class="'+(page===n[0]?"active":"")+'">'+n[1]+'</button>').join("")}
-function priorities(){let a=S.tasks.filter(x=>!x.done).slice(0,5);return a.length?a.map(x=>'<div class="list-row"><span><b>'+esc(x.text)+'</b><small>'+esc(x.date||"No date")+'</small></span><span class="pill">Open</span></div>').join(""):'<div class="empty">No open actions yet.</div>'}
-function dashboard(){let cv=Object.values(S.coverage).flat().length;return head("Dashboard","Your teaching, curriculum, assessment and planning workspace.","Workspace ready")+'<div class="hero card"><div><span class="eyebrow">RABIUL WORK HUB 3.0</span><h2>Teaching work, organised around what you actually need.</h2><p>Plan from the specification, build lessons in your Oldham College style, track coverage and keep assessment actions visible.</p></div><div class="quick-actions">'+btn("Plan next lesson","go-lesson",true)+btn("Mark work","go-mark")+btn("Specifications","go-specs")+'</div></div><div class="metric-grid"><div class="metric"><span>Courses</span><b>2</b><small>Exact programmes</small></div><div class="metric"><span>Saved lessons</span><b>'+S.lessons.length+'</b><small>Lesson library</small></div><div class="metric"><span>Covered points</span><b>'+cv+'</b><small>Specification tracker</small></div><div class="metric"><span>Open actions</span><b>'+S.tasks.filter(x=>!x.done).length+'</b><small>Planner</small></div></div><div class="two-col">'+card("Digital Skills for Work Level 3",'<p class="muted">Gateway Software Development extract + delivery planning.</p>'+btn("Open curriculum","ds-course")+btn("Plan lesson","ds-lesson",true))+card("T Level Digital Software Development Year 1",'<p class="muted">Core, Employer Set Project and Occupational Specialism.</p>'+btn("Open curriculum","tl-course")+btn("Plan lesson","tl-lesson",true))+'</div><div class="two-col">'+card("Priority actions",priorities())+card("Teaching standard",'<div class="style-preview">'+esc(S.style.split("\n").slice(0,6).join("\n")).replace(/\n/g,"<br>")+'</div>')+'</div>'}
-function today(){return head("Today","A focused view of what needs your attention.")+'<div class="metric-grid"><div class="metric"><span>Lessons</span><b>'+S.lessons.length+'</b><small>Saved</small></div><div class="metric"><span>Feedback</span><b>'+S.marks.length+'</b><small>Records</small></div><div class="metric"><span>Learners</span><b>'+S.learners.length+'</b><small>Tracked</small></div><div class="metric"><span>Actions</span><b>'+S.tasks.filter(x=>!x.done).length+'</b><small>Open</small></div></div><div class="two-col">'+card("Next actions",priorities())+card("Quick start",'<div class="action-stack">'+btn("Build a lesson","go-lesson",true)+btn("Check specification","go-specs")+btn("Write feedback","go-mark")+btn("Create assignment brief","go-briefs")+'</div>')+'</div>'}
-function courseTabs(){return '<div class="segmented"><button data-course="digitalSkills" class="'+(cid==="digitalSkills"?"active":"")+'">Digital Skills for Work Level 3</button><button data-course="tlevel" class="'+(cid==="tlevel"?"active":"")+'">T Level Digital Software Development Year 1</button></div>'}
-function courses(){let c=C(cid);return head("Curriculum","Programme → content area → specification → lesson.")+courseTabs()+card(c.name,'<p class="muted">'+esc(c.sourceName)+'</p><p>'+esc(c.intent||"Official qualification structure and delivery planning.")+'</p>')+'<div class="unit-grid">'+U(cid).map(u=>'<article class="card unit-card"><div class="unit-top"><span class="pill">'+esc(u.code||("Paper "+(u.paper||"Core")))+'</span><span class="muted">'+(u.glh?u.glh+" GLH":u.count?u.count+" points":"")+'</span></div><h3>'+esc(u.title)+'</h3><p class="muted">'+esc(u.aim||(u.topics||[]).slice(0,4).join(" · "))+'</p><div class="row-actions"><button class="btn secondary" data-unit="'+u.id+'" data-to="specs">Specification</button><button class="btn primary" data-unit="'+u.id+'" data-to="lesson">Plan lesson</button></div></article>').join("")+'</div>'}
-function specs(){let us=U(cid),u=us.find(x=>x.id===uid)||us[0];uid=u.id;let pts=u.criteria||(u.topics||[]).map((t,i)=>({code:(i+1)+".x",text:t})),key=cid+"|"+uid,cov=S.coverage[key]||[];return head("Specifications & Coverage","Track taught content and plan directly from what remains.","Source-aware")+'<div class="spec-shell"><aside class="card spec-list">'+courseTabs()+'<div>'+us.map(x=>'<button class="spec-unit '+(x.id===uid?"active":"")+'" data-spec="'+x.id+'"><b>'+esc(x.title)+'</b><small>'+esc(x.code||((x.count||"")+" points"))+'</small></button>').join("")+'</div></aside><section class="card"><div class="spec-title"><div><span class="pill">Official source</span><h2>'+esc(u.title)+'</h2><p class="muted">'+esc(u.code||C(cid).sourceName)+'</p></div><div class="coverage-ring"><b>'+cov.length+'</b><span>/ '+pts.length+'</span></div></div><div class="criteria">'+pts.map(p=>'<label class="criterion"><input type="checkbox" data-crit="'+esc(p.code)+'" '+(cov.includes(p.code)?"checked":"")+'><span><b>'+esc(p.code)+'</b> '+esc(p.text)+'</span></label>').join("")+'</div><div class="row-actions">'+btn("Plan next lesson from remaining","spec-next",true)+btn("Mark all covered","spec-all")+'</div></section></div>'}
-function generate(){let u=U(cid).find(x=>x.id===uid)||U(cid)[0],topic=$("#lessonTopic")?.value.trim()||u.title,q=($("#prePrompt")?.value||"").toLowerCase(),grp=q.includes("groups of 3")?"groups of 3":q.includes("pair")?"pairs":"pairs or small groups",adv=q.includes("advanced")||q.includes("challenge"),pts=(u.criteria||[]).slice(0,6),s=[{type:"Title",title:topic,body:C(cid).name+"\n"+u.title+"\n\nOldham College · Faculty of Digital & Creative"},{type:"Do Now",title:"Do Now / Retrieval",body:"1. What do you already know about "+topic+"?\n2. Which previous topic links to this?\n3. Give one digital workplace example.\n\nAnswer in full sentences."},{type:"Objectives",title:"Learning Objectives",body:"Explain the key ideas in "+topic+"\nApply them to a realistic scenario\nProduce evidence linked to the specification"}],n=0;while(s.length<18){let p=pts[n%Math.max(1,pts.length)]||{code:"Key concept",text:(u.topics||["Core knowledge"])[n%(u.topics||["x"]).length]};s.push({type:"New learning",title:"New learning: "+topic,body:p.code+": "+p.text+"\n\n• Clear definition\n• Why it matters\n• Realistic digital example"});s.push({type:"Task",title:adv?"Challenge task":"Active task",body:"Work in "+grp+". Apply "+topic+" to a realistic college or workplace scenario. Produce a clear written outcome in full sentences."+(adv?" Compare alternatives and justify your decision.":"")+"\n\nExtension: identify one limitation or risk."});n++}s.push({type:"Assessment",title:"Independent Assessment",body:"Work independently. Answer an assessment-style question on "+topic+".\n\nPoint → technical explanation → applied example → link to the requirement."},{type:"Recap",title:"Recap: 5 Questions",body:"1. Define today's main concept.\n2. Explain its purpose.\n3. Give one realistic example.\n4. Link it to the specification.\n5. Identify one misconception.\n\nExtension: justify which idea is most important and why."});S.draft={course:cid,unit:uid,topic,prompt:$("#prePrompt")?.value||"",slides:s};si=0;save();toast("20-slide lesson generated");render()}
-function lessonEditor(d){let s=d.slides[si]||d.slides[0];return '<div class="lesson-workspace"><aside class="card slide-rail">'+d.slides.map((x,i)=>'<button class="slide-thumb '+(i===si?"active":"")+'" data-slide="'+i+'"><b>'+(i+1)+'. '+esc(x.title)+'</b><small>'+esc(x.type)+'</small></button>').join("")+'</aside><div class="slide-stage"><div class="college-slide"><div class="slide-brand"><b>Oldham College</b><span>Faculty of Digital & Creative</span></div><span class="slide-type">'+esc(s.type)+'</span><h2>'+esc(s.title)+'</h2><div class="slide-body">'+esc(s.body).replace(/\n/g,"<br>")+'</div><footer><span>Oldham College</span><span>'+(si+1)+' / '+d.slides.length+'</span></footer></div></div><aside class="card lesson-tools"><h3>Improve Current Lesson</h3><textarea id="improvePrompt" placeholder="Make tasks more advanced, shorter, groups of 3..."></textarea><div class="chips">'+["More advanced","Shorter","Theory only / no code","Groups of 3","Paired task","Model answer","Exam-style task"].map(x=>'<button class="chip" data-chip="'+x+'">'+x+'</button>').join("")+'</div><div class="row-actions">'+btn("Whole lesson","improve-all",true)+btn("Selected slide","improve-one")+'</div><hr><h3>Edit selected slide</h3><input id="slideTitle" value="'+esc(s.title)+'"><textarea id="slideBody">'+esc(s.body)+'</textarea>'+btn("Update slide","update-slide")+'</aside></div>'}
-function lesson(){let us=U(cid),u=us.find(x=>x.id===uid)||us[0];uid=u.id;return head("Lesson Studio","Oldham College style, specification links and prompt-driven improvements.","Oldham template")+'<section class="card lesson-config"><div class="form-grid"><label>Course<select id="lessonCourse"><option value="digitalSkills" '+(cid==="digitalSkills"?"selected":"")+'>Digital Skills for Work Level 3</option><option value="tlevel" '+(cid==="tlevel"?"selected":"")+'>T Level Digital Software Development Year 1</option></select></label><label>Unit / content area<select id="lessonUnit">'+us.map(x=>'<option value="'+x.id+'" '+(x.id===uid?"selected":"")+'>'+esc(x.title)+'</option>').join("")+'</select></label><label class="span2">Topic<input id="lessonTopic" value="'+esc(S.draft?.topic||u.title)+'"></label><label class="span2">Improvement prompt before generation<textarea id="prePrompt" placeholder="100% theoretical, no code, groups of 3, more advanced tasks...">'+esc(S.draft?.prompt||"")+'</textarea></label></div><div class="row-actions">'+btn("Generate 20-slide lesson","generate",true)+btn("Save lesson","save-lesson")+btn("New","new-lesson")+'</div></section>'+(S.draft?lessonEditor(S.draft):card("Ready to build","<p>Choose a unit, add any improvement instructions and generate. Your saved teaching standard is applied automatically.</p>"))}
-function mark(){return head("Mark Work","Consistent WWW / EBI / Overall / Indicative Grade feedback.")+'<div class="two-col"><section class="card"><label>Learner reference<input id="mLearner"></label><label>Assessment<input id="mAssessment"></label><label>WWW<textarea id="www"></textarea></label><label>EBI<textarea id="ebi"></textarea></label><label>Overall<textarea id="overall"></textarea></label><label>Indicative Grade<input id="grade"></label><div class="row-actions">'+btn("Save feedback","save-mark",true)+btn("Copy","copy-mark")+'</div></section>'+card("Recent feedback",S.marks.length?S.marks.slice(0,6).map(m=>'<div class="list-row"><span><b>'+esc(m.learner)+'</b><small>'+esc(m.assessment)+' · '+esc(m.grade)+'</small></span></div>').join(""):'<div class="empty">No feedback saved.</div>')+'</div>'}
-function briefs(){return head("Assignment Briefs","Short, professional, student-facing briefs.")+'<div class="two-col"><section class="card"><label>Assignment title<input id="bTitle"></label><label>Unit / topic<input id="bUnit"></label><label>Criteria / requirements<textarea id="bCriteria"></textarea></label>'+btn("Generate concise brief","make-brief",true)+'</section><section class="card"><h3>Preview</h3><div id="briefPreview" class="document-preview"><p class="muted">Create a brief to preview it here.</p></div></section></div>'}
-function learners(){return head("Learners","Simple local teaching and follow-up records.")+'<div class="two-col"><section class="card"><label>Learner reference<input id="lRef"></label><label>Course<select id="lCourse"><option>Digital Skills for Work Level 3</option><option>T Level Digital Software Development Year 1</option></select></label><label>Attendance %<input id="lAtt" type="number"></label><label>Note<textarea id="lNote"></textarea></label>'+btn("Save learner","save-learner",true)+'</section>'+card("Records",S.learners.length?S.learners.map(x=>'<div class="list-row"><span><b>'+esc(x.ref)+'</b><small>'+esc(x.course)+' · '+x.attendance+'%</small></span><span class="pill">'+(x.attendance<80?"Follow up":"Tracked")+'</span></div>').join(""):'<div class="empty">No learner records.</div>')+'</div>'}
-function planner(){return head("Weekly Planner","Teaching and admin actions in one queue.")+'<div class="two-col"><section class="card"><label>Action<input id="taskText"></label><label>Due date<input id="taskDate" type="date"></label>'+btn("Add action","add-task",true)+'</section>'+card("Open actions",priorities())+'</div>'}
-function intel(){return head("Intelligence","Prepare a context-rich request from your Hub.","Smart handoff")+'<div class="two-col"><section class="card"><label>Focus<select id="iFocus"><option>Full Hub</option><option>Curriculum & coverage</option><option>Lessons & planning</option><option>Assessment & marking</option><option>Learner support</option></select></label><label>Request<textarea id="iAsk"></textarea></label><div class="row-actions">'+btn("Prepare request","prepare-intel",true)+btn("Copy","copy-intel")+'</div><textarea id="iOut" class="prepared" readonly></textarea></section>'+card("No extra API required","<p>The Hub packages your relevant context into a high-quality request for handoff. It does not claim a separate paid model is running inside the webpage.</p>")+'</div>'}
-function settings(){return head("Settings","Teaching standard, backup and diagnostics.")+'<div class="two-col"><section class="card"><h3>My teaching style</h3><textarea id="styleText" class="tall">'+esc(S.style)+'</textarea><div class="row-actions">'+btn("Save style","save-style",true)+btn("Reset","reset-style")+'</div></section><section class="card"><h3>Data & diagnostics</h3><div class="action-stack">'+btn("Export backup","export")+btn("Run self-check","selfcheck")+'</div><pre id="diag">Version 3.0 · Ready</pre></section></div>'}
-function generic(t,s,a){return head(t,s)+'<div class="unit-grid">'+a.map(x=>card(x,'<p class="muted">Workspace ready for notes, records and actions.</p><textarea placeholder="Add notes..."></textarea>')).join("")+'</div>'}
-function render(){renderNav();let m={dashboard,today,courses,specs,lesson,mark,briefs,learners,planner,intel,settings,assessment:()=>generic("Assessment Planner","Plan formative checks, mocks and evidence.",["Assessment calendar","Upcoming evidence","Mock planning","Resubmissions"]),support:()=>generic("Attendance & Interventions","Track concerns and follow-up.",["Attendance concerns","Parent / NOK contact","Interventions","Support referrals"]),one2one:()=>generic("One-to-Ones","Concise learner catch-ups.",["Current one-to-ones","Strengths","Targets","Follow-up"]),progression:()=>generic("Progression & Transfers","Track destinations and course movement.",["Transfers","Destinations","Careers actions","Follow-up"]),rooms:()=>generic("Rooms & Equipment","Track room and equipment issues.",["Room issues","Laptop cabinets","Equipment faults","Room changes"]),employers:()=>generic("Employer Engagement","Plan industry activity.",["Employer contacts","Guest talks","Site visits","Industry projects"])};$("#app").innerHTML=(m[page]||dashboard)();bind()}
-function bind(){$$("[data-course]").forEach(b=>b.onclick=()=>{cid=b.dataset.course;uid=U(cid)[0].id;render()});$$("[data-unit]").forEach(b=>b.onclick=()=>{uid=b.dataset.unit;page=b.dataset.to;render()});$$("[data-spec]").forEach(b=>b.onclick=()=>{uid=b.dataset.spec;render()});$$("[data-crit]").forEach(x=>x.onchange=()=>{let k=cid+"|"+uid,a=S.coverage[k]||[];S.coverage[k]=x.checked?[...new Set([...a,x.dataset.crit])]:a.filter(v=>v!==x.dataset.crit);save();render()});$$("[data-slide]").forEach(b=>b.onclick=()=>{si=+b.dataset.slide;render()});$$("[data-chip]").forEach(b=>b.onclick=()=>{$("#improvePrompt").value+=($("#improvePrompt").value?", ":"")+b.dataset.chip});$("#lessonCourse")?.addEventListener("change",e=>{cid=e.target.value;uid=U(cid)[0].id;S.draft=null;render()});$("#lessonUnit")?.addEventListener("change",e=>uid=e.target.value)}
-function improve(one){let q=($("#improvePrompt")?.value||"").toLowerCase(),a=one?[S.draft.slides[si]]:S.draft.slides;a.forEach(s=>{if(q.includes("shorter"))s.body=s.body.split("\n").slice(0,5).join("\n");if(q.includes("advanced")&&s.type==="Task")s.body+="\n\nChallenge: compare two approaches, justify your choice and explain a limitation.";if(q.includes("groups of 3")&&s.type==="Task")s.body="Work in groups of 3. Give each learner a clear role.\n\n"+s.body;if(q.includes("pair")&&s.type==="Task")s.body="Work in pairs and agree one final response.\n\n"+s.body;if(q.includes("exam")&&s.type==="Task")s.title="Exam-style task";if(q.includes("model")&&s.type==="New learning")s.body+="\n\nModel structure: Point → explanation → applied example."});save();toast("Lesson improved");render()}
-document.addEventListener("click",e=>{let p=e.target.closest("[data-page]");if(p){page=p.dataset.page;render();return}let b=e.target.closest("[data-act]");if(!b)return,a=b.dataset.act;if(a==="go-lesson")page="lesson";if(a==="go-mark")page="mark";if(a==="go-specs")page="specs";if(a==="go-briefs")page="briefs";if(a==="ds-course"){cid="digitalSkills";page="courses"}if(a==="tl-course"){cid="tlevel";page="courses"}if(a==="ds-lesson"){cid="digitalSkills";uid="programming-implementation";page="lesson"}if(a==="tl-lesson"){cid="tlevel";uid="core-2";page="lesson"}if(a==="generate")return generate();if(a==="new-lesson"){S.draft=null;save()}if(a==="save-lesson"&&S.draft){S.lessons.unshift({...S.draft,id:Date.now()});save();toast("Lesson saved")}if(a==="improve-all")return improve(false);if(a==="improve-one")return improve(true);if(a==="update-slide"){let s=S.draft.slides[si];s.title=$("#slideTitle").value;s.body=$("#slideBody").value;save();toast("Slide updated")}if(a==="spec-next"){let u=U(cid).find(x=>x.id===uid),cov=S.coverage[cid+"|"+uid]||[],n=(u.criteria||[]).find(x=>!cov.includes(x.code));page="lesson";S.draft=null;render();if(n)setTimeout(()=>$("#lessonTopic").value=n.code+" "+n.text,0);return}if(a==="spec-all"){let u=U(cid).find(x=>x.id===uid);S.coverage[cid+"|"+uid]=(u.criteria||[]).map(x=>x.code);save()}if(a==="save-mark"){S.marks.unshift({learner:$("#mLearner").value,assessment:$("#mAssessment").value,www:$("#www").value,ebi:$("#ebi").value,overall:$("#overall").value,grade:$("#grade").value});save();toast("Feedback saved")}if(a==="copy-mark"){navigator.clipboard?.writeText("WWW: "+$("#www").value+"\n\nEBI: "+$("#ebi").value+"\n\nOverall: "+$("#overall").value+"\n\nIndicative Grade: "+$("#grade").value);toast("Copied")}if(a==="make-brief"){$("#briefPreview").innerHTML="<h2>"+esc($("#bTitle").value||"Assignment Brief")+"</h2><p><b>Unit:</b> "+esc($("#bUnit").value)+"</p><h3>Your task</h3><p>Complete the work below and provide clear evidence that meets every listed requirement.</p><h3>Requirements</h3><p>"+esc($("#bCriteria").value).replace(/\n/g,"<br>")+"</p><h3>Evidence to submit</h3><p>Submit completed work with explanations, screenshots and testing/evaluation evidence where relevant. Use your own words.</p>"}if(a==="save-learner"){S.learners.push({ref:$("#lRef").value,course:$("#lCourse").value,attendance:+$("#lAtt").value||0,note:$("#lNote").value});save();toast("Learner saved")}if(a==="add-task"){S.tasks.push({text:$("#taskText").value,date:$("#taskDate").value,done:false});save();toast("Action added")}if(a==="prepare-intel"){let ask=$("#iAsk").value,ctx={focus:$("#iFocus").value,request:ask,course:cid,coverage:S.coverage,teachingStyle:S.style,recentLessons:S.lessons.slice(0,3),openTasks:S.tasks.filter(x=>!x.done)};$("#iOut").value="Use high reasoning effort.\n\nREQUEST:\n"+ask+"\n\nWORK HUB CONTEXT:\n"+JSON.stringify(ctx,null,2)+"\n\nUse concise, natural, professional wording and my Oldham College teaching standard."}if(a==="copy-intel"){navigator.clipboard?.writeText($("#iOut").value);toast("Copied")}if(a==="save-style"){S.style=$("#styleText").value;save();toast("Style saved")}if(a==="reset-style"){S.style=(D.defaultTeachingStyle||[]).join("\n");save()}if(a==="export"){let z=new Blob([JSON.stringify({version:"3.0",state:S},null,2)],{type:"application/json"}),u=URL.createObjectURL(z),x=document.createElement("a");x.href=u;x.download="rabiul-work-hub-backup.json";x.click();URL.revokeObjectURL(u)}if(a==="selfcheck"){$("#diag").textContent="Version 3.0\nData source: OK\nLocal storage: OK\nCourses: 2\nLesson Studio: OK\nSpecifications: OK\nMarking: OK\nBackup: OK";return}render()});
+(function(){
+'use strict';
+
+const D = window.RWH_DATA;
+const KEY = 'rwh2_state';
+const SCHEMA = 2;
+const C1 = D.courses.digitalSkills.name;
+const C2 = D.courses.tlevel.name;
+
+const NAV = [
+  ['WORKSPACE',[
+    ['dashboard','Dashboard'],['curriculum','Curriculum'],['specs','Specifications'],['lesson','Lesson Studio'],['intelligence','Intelligence']
+  ]],
+  ['ASSESSMENT',[
+    ['marking','Mark Work'],['briefs','Assignment Briefs']
+  ]],
+  ['LEARNERS',[
+    ['learners','Learners'],['attendance','Attendance'],['oneToOnes','1:1s'],['progression','Progression']
+  ]],
+  ['PLANNING & ADMIN',[
+    ['planner','Weekly Planner'],['timetable','Timetable'],['rooms','Rooms & Equipment'],['employers','Employer Engagement'],['resources','Resources'],['comms','Emails & Logs']
+  ]],
+  ['SYSTEM',[
+    ['settings','Settings']
+  ]]
+];
+
+const DEFAULT_STATE = () => ({
+  schema: SCHEMA,
+  style: D.defaultTeachingStyle.join('\n'),
+  prefs: {
+    defaultLessonPrompt: 'Keep it natural, specification-linked, active and appropriately challenging.',
+    currentCourse: 'digitalSkills'
+  },
+  coverage: {},
+  lessons: [],
+  marking: [],
+  briefs: [],
+  tasks: [],
+  learners: [],
+  attendance: [],
+  oneToOnes: [],
+  progression: [],
+  timetable: [],
+  rooms: [],
+  employers: [],
+  resources: [],
+  comms: [],
+  vault: [],
+  lastPage: 'dashboard',
+  createdAt: new Date().toISOString()
+});
+
+let state = loadState();
+let ui = {
+  page: state.lastPage || 'dashboard',
+  course: state.prefs.currentCourse || 'digitalSkills',
+  specUnitId: null,
+  currentSlides: [],
+  selectedSlide: 0,
+  lessonPromptHistory: [],
+  markFeedback: null,
+  briefPreview: null
+};
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      return migrate(parsed);
+    }
+  }catch(e){}
+  const s = DEFAULT_STATE();
+  try{
+    const legacyStyle = JSON.parse(localStorage.getItem('rwh_live_style') || 'null');
+    const legacyLessons = JSON.parse(localStorage.getItem('rwh_live_lessons') || 'null');
+    const legacyTasks = JSON.parse(localStorage.getItem('rwh_live_tasks') || 'null');
+    const legacyLearners = JSON.parse(localStorage.getItem('rwh_live_learners') || 'null');
+    const legacyCoverage = JSON.parse(localStorage.getItem('rwh_live_coverage') || 'null');
+    const legacyVault = JSON.parse(localStorage.getItem('rwh_live_vault') || 'null');
+    if(legacyStyle) s.style = legacyStyle;
+    if(Array.isArray(legacyLessons)) s.lessons = legacyLessons;
+    if(Array.isArray(legacyTasks)) s.tasks = legacyTasks;
+    if(Array.isArray(legacyLearners)) s.learners = legacyLearners;
+    if(legacyCoverage && typeof legacyCoverage === 'object') s.coverage = legacyCoverage;
+    if(Array.isArray(legacyVault)) s.vault = legacyVault;
+  }catch(e){}
+  saveState(s);
+  return s;
+}
+function migrate(s){
+  const base = DEFAULT_STATE();
+  s = Object.assign(base,s||{});
+  s.prefs = Object.assign(base.prefs,s.prefs||{});
+  ['coverage'].forEach(k=>{ if(!s[k] || typeof s[k] !== 'object') s[k]={}; });
+  ['lessons','marking','briefs','tasks','learners','attendance','oneToOnes','progression','timetable','rooms','employers','resources','comms','vault']
+    .forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; });
+  s.schema = SCHEMA;
+  return s;
+}
+function saveState(s=state){
+  try{
+    localStorage.setItem(KEY,JSON.stringify(s));
+  }catch(e){
+    toast('Could not save locally on this browser.');
+  }
+}
+function commit(){
+  state.lastPage = ui.page;
+  state.prefs.currentCourse = ui.course;
+  saveState();
+}
+function esc(v){
+  return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function nl(v){ return esc(v).replace(/\n/g,'<br>'); }
+function uid(prefix='id'){ return prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(v){
+  if(!v) return 'No date';
+  try{return new Date(v+'T12:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch(e){return v;}
+}
+function toast(msg){
+  const el=document.getElementById('toast'); if(!el) return;
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove('show'),2300);
+}
+function modal(html){
+  document.getElementById('modalContent').innerHTML=html;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+window.closeModal=closeModal;
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+
+function renderNav(){
+  const nav=document.getElementById('nav');
+  nav.innerHTML=NAV.map(([section,items])=>
+    `<div class="nav-section">${esc(section)}</div>`+
+    items.map(([id,label])=>`<button data-page="${id}" class="${ui.page===id?'active':''}" onclick="RWH.go('${id}')"><span class="dot"></span>${esc(label)}</button>`).join('')
+  ).join('');
+  const mobile=[['dashboard','Home'],['curriculum','Courses'],['lesson','Lesson'],['marking','Mark'],['settings','More']];
+  document.getElementById('mobilebar').innerHTML=mobile.map(([id,label])=>`<button data-page="${id}" class="${ui.page===id?'active':''}" onclick="RWH.go('${id}')">${label}</button>`).join('');
+}
+function pageHead(title,subtitle,right=''){
+  return `<div class="page-head"><div><button class="drawer-btn" onclick="RWH.toggleDrawer()">Menu</button><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>${right||''}</div>`;
+}
+function render(){
+  renderNav();
+  document.body.classList.remove('drawer-open');
+  const fn = {
+    dashboard:renderDashboard,curriculum:renderCurriculum,specs:renderSpecs,lesson:renderLesson,
+    intelligence:renderIntelligence,marking:renderMarking,briefs:renderBriefs,learners:renderLearners,
+    attendance:renderAttendance,oneToOnes:renderOneToOnes,progression:renderProgression,planner:renderPlanner,
+    timetable:renderTimetable,rooms:renderRooms,employers:renderEmployers,resources:renderResources,
+    comms:renderComms,settings:renderSettings
+  }[ui.page] || renderDashboard;
+  fn();
+  commit();
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function go(page){ ui.page=page; render(); }
+function toggleDrawer(){ document.body.classList.toggle('drawer-open'); }
+window.RWH={go,toggleDrawer};
+
+function course(id=ui.course){ return D.courses[id]; }
+function dsUnit(id){ return D.courses.digitalSkills.units.find(u=>u.id===id); }
+function allCourseAreas(courseId){
+  if(courseId==='digitalSkills') return D.courses.digitalSkills.units.map(u=>({id:u.id,title:u.title,kind:'unit'}));
+  return [
+    ...D.courses.tlevel.core.map(x=>({id:x.id,title:x.title,kind:'core'})),
+    {id:'esp',title:'Employer Set Project',kind:'esp'},
+    ...D.courses.tlevel.os.map(x=>({id:x.id,title:'Occupational Specialism: '+x.title,kind:'os'}))
+  ];
+}
+function areaById(courseId,id){
+  if(courseId==='digitalSkills') return dsUnit(id);
+  return D.courses.tlevel.core.find(x=>x.id===id) || D.courses.tlevel.os.find(x=>x.id===id) || (id==='esp'?{id:'esp',title:'Employer Set Project',topics:['Applied core knowledge and skills','Planning','Research','Solution development','Evaluation']} : null);
+}
+function coverageKey(courseId,areaId,code='area'){ return [courseId,areaId,code].join('|'); }
+function isCovered(key){ return !!state.coverage[key]; }
+function setCovered(key,val){ if(val) state.coverage[key]={covered:true,date:today()}; else delete state.coverage[key]; saveState(); }
+function digitalCoverage(){
+  const all=D.courses.digitalSkills.units.flatMap(u=>u.criteria.map(c=>coverageKey('digitalSkills',u.id,c.code)));
+  const covered=all.filter(isCovered).length;
+  return {total:all.length,covered,pct:all.length?Math.round(covered/all.length*100):0};
+}
+function tlevelCoverage(){
+  const all=[...D.courses.tlevel.core.map(x=>coverageKey('tlevel',x.id)),coverageKey('tlevel','esp'),...D.courses.tlevel.os.map(x=>coverageKey('tlevel',x.id))];
+  const covered=all.filter(isCovered).length;
+  return {total:all.length,covered,pct:Math.round(covered/all.length*100)};
+}
+function unitCriteria(courseId,areaId){
+  if(courseId==='digitalSkills'){
+    const u=dsUnit(areaId); return u?u.criteria:[];
+  }
+  const a=areaById(courseId,areaId);
+  if(!a) return [];
+  return [{code:'AREA',text:a.title+(a.count?` — ${a.count} numbered specification points in the official source.`:'')}];
+}
+function uncoveredCriteria(courseId,areaId){
+  return unitCriteria(courseId,areaId).filter(c=>!isCovered(coverageKey(courseId,areaId,c.code)));
+}
+
+function renderDashboard(){
+  const ds=digitalCoverage(), tl=tlevelCoverage();
+  const upcoming=[...state.tasks].filter(t=>!t.done).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')).slice(0,5);
+  const atRisk=state.learners.filter(l=>Number(l.attendance||100)<85 || l.risk==='High').length;
+  const recent=state.lessons[0];
+  const app=document.getElementById('app');
+  app.innerHTML=pageHead('Dashboard','Your teaching, curriculum, assessment and planning workspace.','<span class="status">Workspace ready</span>')+
+  `<div class="hero-band">
+    <span class="pill">Rabiul teaching profile</span>
+    <h2 style="font-size:27px;margin:10px 0 5px">One workspace for both courses</h2>
+    <p>Plan from the specification, track what has been covered, build lessons in your Oldham College style, mark work, manage learner follow-up and keep admin actions in one place.</p>
+    <div class="toolbar">
+      <button class="btn" onclick="RWH.go('lesson')">Plan a lesson</button>
+      <button class="btn secondary" onclick="RWH.go('marking')">Mark work</button>
+      <button class="btn secondary" onclick="RWH.go('specs')">Check specification</button>
+    </div>
+    <div class="mini-grid" style="margin-top:14px">
+      <div class="mini"><b>${state.lessons.length}</b><span>saved lessons</span></div>
+      <div class="mini"><b>${state.tasks.filter(t=>!t.done).length}</b><span>open planner actions</span></div>
+      <div class="mini"><b>${atRisk}</b><span>learner flags</span></div>
+    </div>
+  </div>
+
+  <div class="grid g4" style="margin-top:14px">
+    <div class="card"><div class="muted small">Digital Skills coverage</div><div class="kpi">${ds.pct}%</div><div class="progress"><span style="width:${ds.pct}%"></span></div><div class="small muted" style="margin-top:6px">${ds.covered}/${ds.total} official Gateway criteria marked covered</div></div>
+    <div class="card"><div class="muted small">T Level areas</div><div class="kpi">${tl.pct}%</div><div class="progress"><span style="width:${tl.pct}%"></span></div><div class="small muted" style="margin-top:6px">${tl.covered}/${tl.total} core / ESP / OS areas tracked</div></div>
+    <div class="card"><div class="muted small">Learners</div><div class="kpi">${state.learners.length}</div><div class="small muted">Local learner records</div></div>
+    <div class="card"><div class="muted small">Assessment records</div><div class="kpi">${state.marking.length}</div><div class="small muted">Feedback saved in Hub</div></div>
+  </div>
+
+  <div class="grid g2" style="margin-top:14px">
+    ${courseDashboardCard('digitalSkills',ds)}
+    ${courseDashboardCard('tlevel',tl)}
+  </div>
+
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card">
+      <div class="card-title"><h3>Next actions</h3><button class="btn ghost smallbtn" onclick="RWH.go('planner')">Open planner</button></div>
+      ${upcoming.length?`<div class="list">${upcoming.map(t=>`<div class="item"><div class="item-title">${esc(t.text)}</div><div class="meta"><span class="pill gray">${esc(t.priority||'Normal')}</span><span class="small muted">${fmtDate(t.date)}</span></div></div>`).join('')}</div>`:'<div class="empty">No open planner tasks yet.</div>'}
+    </div>
+    <div class="card">
+      <div class="card-title"><h3>Resume work</h3></div>
+      ${recent?`<div class="item"><div class="item-title">${esc(recent.topic||'Saved lesson')}</div><div class="small muted">${esc(recent.courseName||recent.course||'')} · ${recent.slides?recent.slides.length:0} slides</div><div class="toolbar"><button class="btn secondary smallbtn" onclick="RWH.loadLesson('${esc(recent.id)}')">Open lesson</button></div></div>`:'<div class="empty">Your most recent saved lesson will appear here.</div>'}
+      <div class="quick-actions" style="margin-top:12px">
+        <button class="quick-action" onclick="RWH.go('attendance')"><b>Attendance</b><span class="small muted">Record a session</span></button>
+        <button class="quick-action" onclick="RWH.go('oneToOnes')"><b>1:1</b><span class="small muted">Add follow-up</span></button>
+        <button class="quick-action" onclick="RWH.go('rooms')"><b>Room issue</b><span class="small muted">Log equipment</span></button>
+        <button class="quick-action" onclick="RWH.go('comms')"><b>Email / log</b><span class="small muted">Draft quickly</span></button>
+      </div>
+    </div>
+  </div>`;
+}
+function courseDashboardCard(courseId,cov){
+  const c=course(courseId);
+  const next=getSuggestedNext(courseId);
+  return `<div class="card course-hero">
+    <div class="course-title">${esc(c.name)}</div>
+    <div class="small muted" style="margin:4px 0 12px">${esc(c.sourceName)}</div>
+    <div class="inline-stat"><span>Coverage tracked</span><b>${cov.pct}%</b></div>
+    <div class="inline-stat"><span>Suggested next</span><b style="max-width:60%;text-align:right">${esc(next)}</b></div>
+    <div class="toolbar">
+      <button class="btn secondary smallbtn" onclick="RWH.openCourse('${courseId}')">Open curriculum</button>
+      <button class="btn ghost smallbtn" onclick="RWH.planSuggested('${courseId}')">Plan next lesson</button>
+    </div>
+  </div>`;
+}
+function getSuggestedNext(courseId){
+  if(courseId==='digitalSkills'){
+    for(const u of D.courses.digitalSkills.units){
+      const unc=u.criteria.find(c=>!isCovered(coverageKey(courseId,u.id,c.code)));
+      if(unc) return `${u.title} ${unc.code}`;
+    }
+    return 'Review / stretch / progression';
+  }
+  for(const a of allCourseAreas('tlevel')){
+    if(!isCovered(coverageKey('tlevel',a.id))) return a.title.replace(/^Content Area \d+: /,'');
+  }
+  return 'Review and assessment preparation';
+}
+function openCourse(courseId){ ui.course=courseId; ui.page='curriculum'; render(); }
+function planSuggested(courseId){
+  ui.course=courseId;
+  const area=allCourseAreas(courseId).find(a=>{
+    if(courseId==='digitalSkills') return uncoveredCriteria(courseId,a.id).length;
+    return !isCovered(coverageKey(courseId,a.id));
+  }) || allCourseAreas(courseId)[0];
+  ui.page='lesson'; render();
+  setTimeout(()=>{
+    const c=document.getElementById('lessonCourse'); if(c){c.value=courseId; lessonCourseChanged(area.id);}
+  },0);
+}
+
+function renderCurriculum(){
+  const app=document.getElementById('app');
+  app.innerHTML=pageHead('Curriculum','Delivery sequence, units/content areas and next-teaching decisions.')+
+  `<div class="subtabs">
+    <button class="subtab ${ui.course==='digitalSkills'?'active':''}" onclick="RWH.setCourse('digitalSkills')">${esc(C1)}</button>
+    <button class="subtab ${ui.course==='tlevel'?'active':''}" onclick="RWH.setCourse('tlevel')">${esc(C2)}</button>
+  </div>
+  ${ui.course==='digitalSkills'?renderDigitalCurriculum():renderTLevelCurriculum()}`;
+}
+function setCourse(id){ ui.course=id; render(); }
+function renderDigitalCurriculum(){
+  const c=D.courses.digitalSkills;
+  return `<div class="grid g2">
+    <div class="card">
+      <span class="pill">Curriculum intent</span>
+      <h3 style="margin-top:9px">${esc(c.name)}</h3>
+      <p>${esc(c.intent)}</p>
+      <div class="note"><b>Delivery sequence:</b> ${esc(c.deliverySequence)}</div>
+      <h4 style="margin:14px 0 8px">Five Elevate Skills</h4>
+      <div class="chips">${c.elevateSkills.map(x=>`<span class="pill gray">${esc(x)}</span>`).join('')}</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><h3>Scheme of Learning highlights</h3><span class="pill blue">2026/27</span></div>
+      <div class="timeline">${c.deliveryWeeks.map(w=>`<div class="timeline-item"><b>Week ${w.week}: ${esc(w.title)}</b><div class="small muted" style="margin:4px 0">${w.learning.map(esc).join(' · ')}</div><div class="small"><b>Progress:</b> ${esc(w.assessment)}</div></div>`).join('')}</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="card-title"><h3>Qualification units in uploaded Gateway extract</h3><button class="btn ghost smallbtn" onclick="RWH.go('specs')">Specification library</button></div>
+    <div class="grid g2">${c.units.map(u=>{
+      const covered=u.criteria.filter(cr=>isCovered(coverageKey('digitalSkills',u.id,cr.code))).length;
+      const pct=Math.round(covered/u.criteria.length*100);
+      return `<div class="week-card"><div style="display:flex;justify-content:space-between;gap:8px"><strong>${esc(u.title)}</strong><span class="pill">${esc(u.code)}</span></div>
+      <div class="small muted">${u.glh} GLH · ${u.credits} credits · ${covered}/${u.criteria.length} criteria covered</div>
+      <div class="progress" style="margin-top:8px"><span style="width:${pct}%"></span></div>
+      <div class="toolbar"><button class="btn secondary smallbtn" onclick="RWH.openSpec('${u.id}')">Open criteria</button><button class="btn ghost smallbtn" onclick="RWH.planArea('digitalSkills','${u.id}')">Plan lesson</button></div></div>`;
+    }).join('')}</div>
+  </div>`;
+}
+function renderTLevelCurriculum(){
+  const c=D.courses.tlevel;
+  return `<div class="grid g2">
+    <div class="card">
+      <span class="pill blue">Official source</span>
+      <h3 style="margin-top:9px">${esc(c.name)}</h3>
+      <p class="muted">${esc(c.sourceName)}</p>
+      <div class="grid g2">${c.assessment.map(a=>`<div class="item"><b>${esc(a.name)}</b><div class="small muted">${esc(a.duration)} · ${a.marks} marks · ${esc(a.weight)}</div></div>`).join('')}</div>
+    </div>
+    <div class="card">
+      <h3>Year 1 planning principle</h3>
+      <p>Use Core content to build secure knowledge, retrieval and exam technique while connecting tasks to the Employer Set Project and later software-development specialism.</p>
+      <div class="note">Use the specification point count as a coverage warning: completing a topic title is not the same as covering all numbered points underneath it.</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="card-title"><h3>Core content</h3><span class="pill gray">8 areas</span></div>
+    <div class="grid g2">${c.core.map(a=>areaCard('tlevel',a)).join('')}</div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="card-title"><h3>Occupational Specialism</h3><span class="pill gray">8 areas</span></div>
+    <div class="grid g2">${c.os.map(a=>areaCard('tlevel',a,true)).join('')}</div>
+  </div>`;
+}
+function areaCard(courseId,a,os=false){
+  const key=coverageKey(courseId,a.id);
+  return `<div class="item"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(a.title)}</b>${isCovered(key)?'<span class="pill green">Covered</span>':'<span class="pill gray">Not marked</span>'}</div>
+  <div class="small muted">${a.count?`${a.count} numbered specification points · Paper ${a.paper}`:(os?'Occupational Specialism':'')}</div>
+  ${a.topics?`<div class="chips" style="margin-top:7px">${a.topics.slice(0,5).map(t=>`<span class="pill gray">${esc(t)}</span>`).join('')}</div>`:''}
+  <div class="toolbar"><button class="btn secondary smallbtn" onclick="RWH.openSpec('${a.id}')">Open</button><button class="btn ghost smallbtn" onclick="RWH.planArea('tlevel','${a.id}')">Plan lesson</button></div></div>`;
+}
+
+function renderSpecs(){
+  const areas=allCourseAreas(ui.course);
+  if(!ui.specUnitId || !areas.some(a=>a.id===ui.specUnitId)) ui.specUnitId=areas[0].id;
+  const a=areaById(ui.course,ui.specUnitId);
+  const q='';
+  document.getElementById('app').innerHTML=pageHead('Specifications & Coverage','Search, mark coverage and move directly from criteria into lesson planning.','<span class="status">Official sources loaded</span>')+
+  `<div class="card" style="margin-bottom:14px">
+    <div class="form-grid">
+      <label><span class="label">Course</span><select id="specCourse" onchange="RWH.specCourseChanged(this.value)"><option value="digitalSkills" ${ui.course==='digitalSkills'?'selected':''}>${esc(C1)}</option><option value="tlevel" ${ui.course==='tlevel'?'selected':''}>${esc(C2)}</option></select></label>
+      <label class="search-box"><span class="label">Search this course</span><input id="specSearch" placeholder="Search unit, area, criterion or topic" oninput="RWH.filterSpecs(this.value)"></label>
+    </div>
+  </div>
+  <div class="split">
+    <div class="card sidebar-panel"><div id="specAreaList">${renderSpecAreaList(areas,q)}</div></div>
+    <div class="card" id="specDetail">${renderSpecDetail(ui.course,a)}</div>
+  </div>`;
+}
+function renderSpecAreaList(areas,q){
+  return areas.filter(a=>!q || a.title.toLowerCase().includes(q.toLowerCase())).map(a=>{
+    const active=a.id===ui.specUnitId;
+    return `<button class="thumb ${active?'active':''}" onclick="RWH.selectSpec('${a.id}')"><b>${esc(a.title)}</b><span>${a.kind==='unit'?(dsUnit(a.id)?.code||'Gateway unit'):a.kind==='core'?'T Level Core':a.kind==='os'?'Occupational Specialism':'Employer Set Project'}</span></button>`;
+  }).join('') || '<div class="empty">No matching areas.</div>';
+}
+function renderSpecDetail(courseId,a){
+  if(!a) return '<div class="empty">Select an area.</div>';
+  if(courseId==='digitalSkills'){
+    const covered=a.criteria.filter(c=>isCovered(coverageKey(courseId,a.id,c.code))).length;
+    return `<span class="pill blue">Uploaded Gateway source</span><h2 style="margin:9px 0 4px">${esc(a.title)}</h2><div class="small muted">${esc(a.code)} · ${a.glh} GLH · ${a.credits} credits</div>
+    <p>${esc(a.aim)}</p>
+    <div class="source-box"><b>Indicative content / teaching topics</b><div class="chips">${a.topics.map(t=>`<span class="pill gray">${esc(t)}</span>`).join('')}</div></div>
+    <div style="margin:14px 0 8px"><b>Assessment criteria</b> · ${covered}/${a.criteria.length} covered</div>
+    ${a.criteria.map(c=>{const key=coverageKey(courseId,a.id,c.code);return `<div class="spec-criterion"><input type="checkbox" ${isCovered(key)?'checked':''} onchange="RWH.toggleCoverage('${key}',this.checked)"><div><b>${esc(c.code)}</b> ${esc(c.text)}</div><span class="spec-code">${esc(c.code)}</span></div>`}).join('')}
+    <div class="toolbar"><button class="btn" onclick="RWH.planArea('${courseId}','${a.id}')">Plan next lesson from this unit</button></div>`;
+  }
+  const key=coverageKey(courseId,a.id);
+  return `<span class="pill blue">Pearson T Level specification · Version 1.0 May 2025</span><h2 style="margin:9px 0 4px">${esc(a.title)}</h2>
+  <div class="small muted">${a.count?`${a.count} numbered specification points · Core Paper ${a.paper}`:(a.id==='esp'?'Employer Set Project':'Occupational Specialism')}</div>
+  ${a.topics?`<div class="source-box" style="margin-top:12px"><b>Planning topics</b><div class="chips">${a.topics.map(t=>`<span class="pill gray">${esc(t)}</span>`).join('')}</div></div>`:''}
+  <div class="note" style="margin-top:12px">Coverage here is tracked at content-area level. Use the official specification source when checking every numbered point underneath the area.</div>
+  <div class="spec-criterion" style="margin-top:10px"><input type="checkbox" ${isCovered(key)?'checked':''} onchange="RWH.toggleCoverage('${key}',this.checked)"><div><b>Area coverage</b><br><span class="small muted">Mark only when you are satisfied the area has been taught/reviewed to your required level.</span></div><span class="spec-code">AREA</span></div>
+  <div class="toolbar"><button class="btn" onclick="RWH.planArea('${courseId}','${a.id}')">Plan lesson from this area</button></div>`;
+}
+function specCourseChanged(v){ ui.course=v; ui.specUnitId=null; render(); }
+function filterSpecs(v){
+  const areas=allCourseAreas(ui.course);
+  const root=document.getElementById('specAreaList'); if(root) root.innerHTML=renderSpecAreaList(areas,v);
+}
+function selectSpec(id){ ui.specUnitId=id; document.getElementById('specDetail').innerHTML=renderSpecDetail(ui.course,areaById(ui.course,id)); }
+function openSpec(id){ ui.specUnitId=id; ui.page='specs'; render(); }
+function toggleCoverage(key,val){ setCovered(key,val); if(ui.page==='specs') selectSpec(ui.specUnitId); else render(); }
+function planArea(courseId,areaId){
+  ui.course=courseId; ui.page='lesson'; ui.specUnitId=areaId; render();
+  setTimeout(()=>{ const c=document.getElementById('lessonCourse'); if(c){c.value=courseId; lessonCourseChanged(areaId);} },0);
+}
+
+function lessonAreaOptions(courseId,selected){
+  return allCourseAreas(courseId).map(a=>`<option value="${a.id}" ${a.id===selected?'selected':''}>${esc(a.title)}</option>`).join('');
+}
+function renderLesson(){
+  const areas=allCourseAreas(ui.course);
+  let areaId=ui.specUnitId || areas[0].id;
+  if(!areas.some(a=>a.id===areaId)) areaId=areas[0].id;
+  ui.specUnitId=areaId;
+  const saved=state.lessons.slice(0,6);
+  document.getElementById('app').innerHTML=pageHead('Lesson Studio','Build, edit and improve specification-linked lessons in your Oldham College teaching style.','<span class="pill">Oldham lesson standard</span>')+
+  `<div class="card" style="margin-bottom:14px">
+    <div class="form-grid">
+      <label><span class="label">Course</span><select id="lessonCourse" onchange="RWH.lessonCourseChanged()"><option value="digitalSkills" ${ui.course==='digitalSkills'?'selected':''}>${esc(C1)}</option><option value="tlevel" ${ui.course==='tlevel'?'selected':''}>${esc(C2)}</option></select></label>
+      <label><span class="label">Unit / content area</span><select id="lessonArea" onchange="RWH.lessonAreaChanged(this.value)">${lessonAreaOptions(ui.course,areaId)}</select></label>
+      <label><span class="label">Topic</span><input id="lessonTopic" value="${esc(areaById(ui.course,areaId)?.title||'')}" placeholder="Specific lesson topic"></label>
+      <label><span class="label">Duration</span><select id="lessonDuration"><option value="210">3.5 hours</option><option value="180">3 hours</option><option value="120">2 hours</option></select></label>
+      <label><span class="label">Slides</span><select id="lessonCount"><option>20</option><option>16</option><option>12</option><option>24</option></select></label>
+      <label><span class="label">Delivery mode</span><select id="lessonMode"><option>Balanced theory + active learning</option><option>100% theoretical</option><option>Programming practical</option><option>Assessment preparation</option><option>Revision / retrieval</option></select></label>
+      <label><span class="label">Grouping</span><select id="lessonGrouping"><option>Mixed</option><option>Groups of 3</option><option>Pairs</option><option>Individual</option></select></label>
+      <label><span class="label">Task frequency</span><select id="lessonFrequency"><option value="2">Task after 2 teaching slides</option><option value="3">Task after 3 teaching slides</option><option value="1">Task after each teaching slide</option></select></label>
+      <label class="full"><span class="label">Lesson improvement prompt</span><textarea id="lessonPrompt" placeholder="Example: 100% theoretical, no code, groups of 3, more advanced tasks, use exam-style questioning.">${esc(state.prefs.defaultLessonPrompt||'')}</textarea></label>
+    </div>
+    <div class="toolbar"><button class="btn" onclick="RWH.generateLesson()">Generate lesson</button><button class="btn secondary" onclick="RWH.saveLesson()">Save lesson</button><button class="btn ghost" onclick="RWH.printLesson()">Print / Save PDF</button><button class="btn ghost" onclick="RWH.newLesson()">New</button></div>
+  </div>
+  <div class="lesson-grid">
+    <div class="card">
+      <div class="card-title"><h3>Slides</h3><span class="pill gray">${ui.currentSlides.length}</span></div>
+      <div class="thumbs" id="lessonThumbs">${renderLessonThumbs()}</div>
+    </div>
+    <div class="slide-stage"><div id="slidePreview">${renderSlidePreview()}</div></div>
+    <div class="lesson-side">
+      <div class="card"><h3>My lesson standard</h3><div class="style-box" style="margin-top:8px">${esc(state.style.split('\n').slice(0,9).join('\n'))}</div></div>
+      <div class="card" style="margin-top:12px">
+        <h3>Improve current lesson</h3>
+        <textarea id="improvePrompt" placeholder="Make tasks more advanced, remove code, add model answers, shorten slide text..."></textarea>
+        <div class="chips" style="margin-top:8px">
+          ${['Shorter','More advanced','Theory only','No code','Groups of 3','Paired task','Model answer','Exam-style task','Task every 2','Recap + extension'].map(x=>`<button class="chip" onclick="RWH.addImprovePrompt('${x}')">${x}</button>`).join('')}
+        </div>
+        <div class="toolbar"><button class="btn smallbtn" onclick="RWH.improveLesson(false)">Improve whole lesson</button><button class="btn secondary smallbtn" onclick="RWH.improveLesson(true)">Selected slide</button></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>Edit selected slide</h3>
+        <label><span class="label">Type</span><select id="editSlideType"><option>Title</option><option>Expectations</option><option>Do Now</option><option>Objectives</option><option>New learning</option><option>Task</option><option>Worked example</option><option>Assessment</option><option>Recap</option></select></label>
+        <label><span class="label">Title</span><input id="editSlideTitle"></label>
+        <label><span class="label">Content</span><textarea id="editSlideBody"></textarea></label>
+        <label><span class="label">Speaker notes</span><textarea id="editSlideNotes"></textarea></label>
+        <div class="toolbar"><button class="btn secondary smallbtn" onclick="RWH.updateSelectedSlide()">Update slide</button><button class="btn danger smallbtn" onclick="RWH.deleteSelectedSlide()">Delete</button></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-title"><h3>Recent saved lessons</h3></div>
+        ${saved.length?`<div class="list">${saved.map(l=>`<div class="item"><b>${esc(l.topic)}</b><div class="small muted">${esc(l.courseName||'')} · ${l.slides?.length||0} slides</div><div class="toolbar"><button class="btn ghost smallbtn" onclick="RWH.loadLesson('${l.id}')">Open</button></div></div>`).join('')}</div>`:'<div class="empty">No saved lessons yet.</div>'}
+      </div>
+    </div>
+  </div>`;
+  fillSlideEditor();
+}
+function lessonCourseChanged(forceArea){
+  ui.course=document.getElementById('lessonCourse').value;
+  const areas=allCourseAreas(ui.course);
+  const chosen=forceArea && areas.some(a=>a.id===forceArea)?forceArea:areas[0].id;
+  ui.specUnitId=chosen;
+  const sel=document.getElementById('lessonArea'); if(sel) sel.innerHTML=lessonAreaOptions(ui.course,chosen);
+  const topic=document.getElementById('lessonTopic'); if(topic) topic.value=areaById(ui.course,chosen)?.title||'';
+}
+function lessonAreaChanged(v){ ui.specUnitId=v; const t=document.getElementById('lessonTopic'); if(t) t.value=areaById(ui.course,v)?.title||''; }
+function makeSlide(type,title,body,notes=''){ return {id:uid('s'),type,title,body,notes}; }
+function teachingPoints(courseId,areaId,topic){
+  const a=areaById(courseId,areaId);
+  if(courseId==='digitalSkills'){
+    const u=dsUnit(areaId);
+    const uncovered=uncoveredCriteria(courseId,areaId);
+    const crit=(uncovered.length?uncovered:u.criteria).map(c=>({title:`Specification ${c.code}`,text:c.text}));
+    const concepts=(u.topics||[]).map(t=>({title:t,text:`Explain ${t.toLowerCase()} clearly, then connect it to ${topic||u.title} using a realistic digital-workplace example.`}));
+    return [...crit,...concepts];
+  }
+  const topics=(a?.topics||[a?.title||topic]).map(t=>({title:t,text:`Teach the key knowledge for ${t}. Define the concept, explain why it matters and connect it to a software-development or digital-business scenario.`}));
+  if(a?.count) topics.unshift({title:'Specification focus',text:`This content area contains ${a.count} numbered specification points. Keep lesson coverage precise and avoid treating the area title as complete coverage.`});
+  return topics;
+}
+function taskBody(topic,group,advanced,exam){
+  const grouping=group==='Groups of 3'?'Work in groups of 3 and assign a clear role to each person.':group==='Pairs'?'Work in pairs and agree one final response.':group==='Individual'?'Work independently.':'Work individually first, then compare with a partner or group.';
+  const core=exam?`Answer an exam-style question on ${topic}. Use a clear point, accurate technical explanation and applied example.`:`Complete an applied task on ${topic}. Use the new learning to solve or explain a realistic digital scenario.`;
+  return `${grouping}\n\n${core}${advanced?' Compare alternatives, justify your decision and identify one limitation.':''}\n\nExpected output: full sentences, correct terminology and evidence linked to the lesson objective.\n\nExtension: apply the idea to a different workplace or software scenario.`;
+}
+function generateLesson(){
+  const courseId=document.getElementById('lessonCourse').value;
+  const areaId=document.getElementById('lessonArea').value;
+  const topic=document.getElementById('lessonTopic').value.trim() || areaById(courseId,areaId)?.title || 'Lesson';
+  const count=Number(document.getElementById('lessonCount').value)||20;
+  const mode=document.getElementById('lessonMode').value;
+  let group=document.getElementById('lessonGrouping').value;
+  let freq=Number(document.getElementById('lessonFrequency').value)||2;
+  const prompt=document.getElementById('lessonPrompt').value.trim();
+  const q=prompt.toLowerCase();
+  const theory=mode==='100% theoretical'||q.includes('theory only')||q.includes('100% theoretical');
+  const noCode=theory||q.includes('no code')||q.includes('remove code');
+  const advanced=q.includes('advanced')||q.includes('stretch')||q.includes('challeng');
+  const exam=mode==='Assessment preparation'||q.includes('exam');
+  if(q.includes('groups of 3')) group='Groups of 3';
+  if(q.includes('pairs')) group='Pairs';
+  if(q.includes('individual')) group='Individual';
+  if(q.includes('task every 3')) freq=3;
+  if(q.includes('task every 2')) freq=2;
+  const points=teachingPoints(courseId,areaId,topic);
+  const slides=[];
+  slides.push(makeSlide('Title',topic,`${course(courseId).name}\n${areaById(courseId,areaId)?.title||''}\n\nOldham College · Faculty of Digital & Creative`,'Introduce the lesson and connect it to prior learning.'));
+  slides.push(makeSlide('Expectations','Classroom expectations',D.classroomExpectations.map((x,i)=>`${i+1}. ${x}`).join('\n'),'Settle the room quickly before retrieval.'));
+  slides.push(makeSlide('Do Now','Do Now / retrieval',`Answer in full sentences:\n\n1. What do you already know about ${topic}?\n2. Which previous topic links to today?\n3. Give one realistic example.\n4. Identify one technical term you expect to use today.\n\nExtension: explain why the previous learning matters for today.`,'Use answers to identify misconceptions before new learning.'));
+  const spec=unitCriteria(courseId,areaId).slice(0,3);
+  slides.push(makeSlide('Objectives','Learning objectives',`By the end of the lesson, learners will be able to:\n• explain the key knowledge in ${topic}\n• apply it to a realistic digital scenario\n• produce assessment-ready evidence${spec.length?`\n\nSpecification focus:\n${spec.map(x=>`${x.code} ${x.text}`).join('\n')}`:''}`,'Keep objectives visible and measurable.'));
+  let teachSinceTask=0,idx=0;
+  while(slides.length < Math.max(8,count-4)){
+    const p=points[idx%points.length]; idx++;
+    slides.push(makeSlide('New learning',p.title,`${p.text}\n\nKey points:\n• define the idea accurately\n• explain why it matters\n• connect it to a realistic example${noCode?'':'\n• use a short technical or code example only if it improves understanding'}\n\nCheck for understanding: ask one learner to explain the idea without reading the slide.`,'Teach in a short chunk, question learners, then move on.'));
+    teachSinceTask++;
+    if(teachSinceTask>=freq && slides.length < count-5){
+      slides.push(makeSlide('Task',exam?'Exam-style task':'Active learning task',taskBody(topic,group,advanced,exam),'Circulate, check misconceptions and select responses to review.'));
+      teachSinceTask=0;
+    }
+  }
+  slides.push(makeSlide('Worked example','Worked / model answer',`Model a strong response to a task on ${topic}.\n\nModel structure:\n1. Make a clear technical point.\n2. Explain how or why it works.\n3. Apply it to the scenario.\n4. Link back to the requirement or specification.\n5. Add a limitation, comparison or justification for higher challenge.`,'Model the thinking process, not just the finished answer.'));
+  slides.push(makeSlide('Assessment','Independent assessment',`Work independently.\n\nProduce an assessment-ready response on ${topic}. Use correct terminology and full sentences. Include an applied example and justify your reasoning where appropriate.\n\nSuccess check:\n• technically accurate\n• directly answers the task\n• evidence is clear\n• explanation goes beyond a definition\n• proofread before submission`,'Use this as the clearest independent evidence from the lesson.'));
+  slides.push(makeSlide('Recap','Recap: 5 questions',`1. Define the main concept from today.\n2. Explain one purpose, benefit or reason it matters.\n3. Apply it to a realistic example.\n4. Link one answer to the specification.\n5. Identify one common error or misconception.\n\nExtension: justify which idea from today is most important and why.`,'Use cold call / mini-whiteboards / written exit check.'));
+  slides.push(makeSlide('Assessment','Exit ticket',`Write one strong paragraph that explains what you learned, applies it to a realistic digital scenario and uses the correct technical vocabulary.\n\nThen identify one area you still need to improve.`,'Collect or sample before learners leave.'));
+  ui.currentSlides=slides.slice(0,count);
+  ui.selectedSlide=0;
+  ui.lessonPromptHistory.unshift({date:new Date().toISOString(),prompt:prompt||'Default teaching style'});
+  renderLesson();
+  toast(`Generated ${ui.currentSlides.length} slides.`);
+}
+function renderLessonThumbs(){
+  if(!ui.currentSlides.length) return '<div class="empty">Generate or open a lesson.</div>';
+  return ui.currentSlides.map((s,i)=>`<button class="thumb ${i===ui.selectedSlide?'active':''}" onclick="RWH.selectSlide(${i})"><b>${i+1}. ${esc(s.title)}</b><span>${esc(s.type)}</span></button>`).join('');
+}
+function renderSlidePreview(){
+  if(!ui.currentSlides.length) return '<div class="card">Generate a lesson to start building.</div>';
+  const s=ui.currentSlides[ui.selectedSlide];
+  return `<div class="slide"><div class="slide-brand"><span>Oldham College</span><span>Faculty of Digital & Creative</span></div><div class="slide-type">${esc(s.type)}</div><h2>${esc(s.title)}</h2><div class="slide-body">${nl(s.body)}</div><div class="slide-footer"><span>Oldham College</span><span>${ui.selectedSlide+1} / ${ui.currentSlides.length}</span></div></div>`;
+}
+function fillSlideEditor(){
+  const s=ui.currentSlides[ui.selectedSlide]; if(!s) return;
+  const type=document.getElementById('editSlideType'),title=document.getElementById('editSlideTitle'),body=document.getElementById('editSlideBody'),notes=document.getElementById('editSlideNotes');
+  if(type) type.value=s.type;
+  if(title) title.value=s.title;
+  if(body) body.value=s.body;
+  if(notes) notes.value=s.notes||'';
+}
+function selectSlide(i){ ui.selectedSlide=i; document.getElementById('lessonThumbs').innerHTML=renderLessonThumbs(); document.getElementById('slidePreview').innerHTML=renderSlidePreview(); fillSlideEditor(); }
+function updateSelectedSlide(){
+  const s=ui.currentSlides[ui.selectedSlide]; if(!s) return;
+  s.type=document.getElementById('editSlideType').value;
+  s.title=document.getElementById('editSlideTitle').value.trim();
+  s.body=document.getElementById('editSlideBody').value;
+  s.notes=document.getElementById('editSlideNotes').value;
+  selectSlide(ui.selectedSlide); toast('Slide updated.');
+}
+function deleteSelectedSlide(){
+  if(!ui.currentSlides.length) return;
+  ui.currentSlides.splice(ui.selectedSlide,1);
+  ui.selectedSlide=Math.max(0,Math.min(ui.selectedSlide,ui.currentSlides.length-1));
+  renderLesson(); toast('Slide deleted.');
+}
+function addImprovePrompt(t){ const e=document.getElementById('improvePrompt'); e.value=(e.value?e.value+', ':'')+t; }
+function improveLesson(selectedOnly){
+  if(!ui.currentSlides.length) return toast('Generate a lesson first.');
+  const raw=document.getElementById('improvePrompt').value.trim(); if(!raw) return toast('Add an improvement instruction.');
+  const q=raw.toLowerCase();
+  const idxs=selectedOnly?[ui.selectedSlide]:ui.currentSlides.map((_,i)=>i);
+  idxs.forEach(i=>{
+    const s=ui.currentSlides[i];
+    if(q.includes('shorter')){
+      const lines=s.body.split('\n').filter(Boolean);
+      s.body=lines.slice(0,Math.max(3,Math.ceil(lines.length*.65))).join('\n');
+    }
+    if((q.includes('advanced')||q.includes('challenge')) && s.type==='Task') s.body += '\n\nChallenge: compare two approaches, justify which is more suitable and explain one limitation.';
+    if((q.includes('theory only')||q.includes('no code')||q.includes('remove code'))) s.body=s.body.replace(/^.*\b(code|coding|programming practical)\b.*$/gim,'').replace(/\n{3,}/g,'\n\n');
+    if(q.includes('groups of 3') && s.type==='Task') s.body='Work in groups of 3. Give each person a defined role and combine your work into one final response.\n\n'+s.body;
+    if(q.includes('paired') && s.type==='Task') s.body='Work in pairs. Each person must contribute, then agree one final response.\n\n'+s.body;
+    if(q.includes('exam') && s.type==='Task'){ s.title='Exam-style task'; s.body='Answer independently using a clear point, technical explanation and applied example.\n\n'+s.body; }
+    if(q.includes('model answer') && (s.type==='Worked example'||s.type==='Task')) s.body += '\n\nModel structure: Point → explanation → applied example → justification / limitation.';
+  });
+  if(!selectedOnly && q.includes('model answer') && !ui.currentSlides.some(s=>s.type==='Worked example')){
+    ui.currentSlides.splice(Math.max(4,ui.currentSlides.length-3),0,makeSlide('Worked example','Worked / model answer','Model a strong response using: Point → technical explanation → applied example → justification.'));
+  }
+  ui.lessonPromptHistory.unshift({date:new Date().toISOString(),prompt:raw,selectedOnly});
+  document.getElementById('improvePrompt').value='';
+  renderLesson(); toast(selectedOnly?'Selected slide improved.':'Lesson improvements applied.');
+}
+function saveLesson(){
+  if(!ui.currentSlides.length) return toast('Generate or open a lesson first.');
+  const courseId=document.getElementById('lessonCourse')?.value||ui.course;
+  const areaId=document.getElementById('lessonArea')?.value||ui.specUnitId;
+  const topic=document.getElementById('lessonTopic')?.value||ui.currentSlides[0]?.title||'Lesson';
+  const rec={id:uid('lesson'),courseId,courseName:course(courseId).name,areaId,areaTitle:areaById(courseId,areaId)?.title||'',topic,date:new Date().toISOString(),slides:JSON.parse(JSON.stringify(ui.currentSlides)),promptHistory:JSON.parse(JSON.stringify(ui.lessonPromptHistory)),styleSnapshot:state.style};
+  state.lessons.unshift(rec); saveState(); renderLesson(); toast('Lesson saved.');
+}
+function loadLesson(id){
+  const l=state.lessons.find(x=>String(x.id)===String(id)); if(!l) return toast('Lesson not found.');
+  ui.course=l.courseId||'digitalSkills'; ui.specUnitId=l.areaId; ui.currentSlides=JSON.parse(JSON.stringify(l.slides||[])); ui.selectedSlide=0; ui.lessonPromptHistory=l.promptHistory||[]; ui.page='lesson'; render();
+}
+function newLesson(){ ui.currentSlides=[]; ui.selectedSlide=0; ui.lessonPromptHistory=[]; renderLesson(); }
+function printLesson(){ if(!ui.currentSlides.length)return toast('Generate a lesson first.'); window.print(); }
+
+function renderMarking(){
+  const areas=allCourseAreas(ui.course);
+  const areaId=ui.specUnitId && areas.some(a=>a.id===ui.specUnitId)?ui.specUnitId:areas[0].id;
+  const crit=unitCriteria(ui.course,areaId);
+  document.getElementById('app').innerHTML=pageHead('Mark Work','Create precise WWW / EBI / Overall feedback and save assessment records.')+
+  `<div class="grid g2">
+    <div class="card">
+      <div class="form-grid">
+        <label><span class="label">Course</span><select id="markCourse" onchange="RWH.markCourseChanged()"><option value="digitalSkills" ${ui.course==='digitalSkills'?'selected':''}>${esc(C1)}</option><option value="tlevel" ${ui.course==='tlevel'?'selected':''}>${esc(C2)}</option></select></label>
+        <label><span class="label">Unit / area</span><select id="markArea" onchange="RWH.markAreaChanged(this.value)">${lessonAreaOptions(ui.course,areaId)}</select></label>
+        <label><span class="label">Learner reference</span><input id="markLearner" placeholder="Initials / learner reference"></label>
+        <label><span class="label">Assessment / task</span><input id="markAssessment" placeholder="e.g. VIA, Task 1, OOP Assignment"></label>
+        <label class="full"><span class="label">Work / evidence summary</span><textarea id="markEvidence" placeholder="What has the learner completed well? You can paste a short summary or key evidence."></textarea></label>
+        <label class="full"><span class="label">Missing / weak evidence</span><textarea id="markMissing" placeholder="Be exact: missing output screenshot, flow arrows, test evidence, explanation too brief..."></textarea></label>
+        <label><span class="label">Indicative grade</span><select id="markGrade"><option>Working towards</option><option>Pass</option><option>Merit</option><option>Distinction</option><option>D-</option><option>D</option><option>D+</option></select></label>
+        <label><span class="label">Resubmission date</span><input id="markResub" type="date"></label>
+      </div>
+      <div class="source-box" style="margin-top:12px"><b>Criteria focus</b><div id="markCriteria">${crit.map(c=>`<label class="spec-criterion"><input type="checkbox" class="mark-criterion" value="${esc(c.code)}"><span><b>${esc(c.code)}</b> ${esc(c.text)}</span></label>`).join('')}</div></div>
+      <div class="toolbar"><button class="btn" onclick="RWH.generateFeedback()">Generate feedback</button><button class="btn secondary" onclick="RWH.prepareMarkingRequest()">Prepare intelligent marking request</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><h3>Feedback preview</h3><span class="pill">WWW / EBI / Overall</span></div>
+      <div id="feedbackPreview">${renderFeedbackPreview()}</div>
+      <div class="toolbar"><button class="btn secondary" onclick="RWH.copyFeedback()">Copy feedback</button><button class="btn" onclick="RWH.saveMarking()">Save record</button></div>
+      <div style="margin-top:16px"><h3>Recent marking</h3>${state.marking.length?`<div class="list" style="margin-top:8px">${state.marking.slice(0,6).map(m=>`<div class="item"><b>${esc(m.learner||'Learner')} · ${esc(m.assessment||'Assessment')}</b><div class="small muted">${esc(m.courseName)} · ${esc(m.grade)} · ${new Date(m.date).toLocaleDateString('en-GB')}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:8px">No marking saved yet.</div>'}</div>
+    </div>
+  </div>`;
+}
+function markCourseChanged(){ ui.course=document.getElementById('markCourse').value; ui.specUnitId=allCourseAreas(ui.course)[0].id; renderMarking(); }
+function markAreaChanged(v){ ui.specUnitId=v; const root=document.getElementById('markCriteria'); if(root) root.innerHTML=unitCriteria(ui.course,v).map(c=>`<label class="spec-criterion"><input type="checkbox" class="mark-criterion" value="${esc(c.code)}"><span><b>${esc(c.code)}</b> ${esc(c.text)}</span></label>`).join(''); }
+function generateFeedback(){
+  const evidence=document.getElementById('markEvidence').value.trim();
+  const missing=document.getElementById('markMissing').value.trim();
+  const grade=document.getElementById('markGrade').value;
+  const selected=[...document.querySelectorAll('.mark-criterion:checked')].map(x=>x.value);
+  const learner=document.getElementById('markLearner').value.trim();
+  const resub=document.getElementById('markResub').value;
+  const www=evidence?`You have shown clear evidence in the areas identified, particularly: ${evidence.replace(/\n+/g,' ')}`:`You have made a clear attempt at the task and there is evidence that you understand some of the required content${selected.length?` for ${selected.join(', ')}`:''}.`;
+  let ebi=missing?`Improve the submission by addressing the following missing or weak evidence: ${missing.replace(/\n+/g,' ')}. Make the changes clearly visible in the final submission and check that every required output is included.`:`Check each selected criterion against your evidence and strengthen any explanation that is mainly descriptive. Use full sentences, correct terminology and show the required outputs clearly.`;
+  if(resub) ebi+=` Resubmit by ${fmtDate(resub)}.`;
+  const overall=`Overall, the work is currently at an indicative ${grade} standard. The strongest improvement will come from making the evidence complete, specific and directly linked to the task requirements${selected.length?` (${selected.join(', ')})`:''}.`;
+  ui.markFeedback={learner,www,ebi,overall,grade,selected,generated:new Date().toISOString()};
+  document.getElementById('feedbackPreview').innerHTML=renderFeedbackPreview();
+}
+function renderFeedbackPreview(){
+  if(!ui.markFeedback) return '<div class="empty">Generate feedback to preview it here.</div>';
+  const f=ui.markFeedback;
+  return `<div class="feedback"><div class="feedback-box"><b>WWW</b>${esc(f.www)}</div><div class="feedback-box"><b>EBI</b>${esc(f.ebi)}</div><div class="feedback-box"><b>Overall</b>${esc(f.overall)}</div><div class="feedback-box"><b>Indicative Grade</b><span class="grade">${esc(f.grade)}</span></div></div>`;
+}
+async function copyText(t){ try{await navigator.clipboard.writeText(t);toast('Copied.');}catch(e){toast('Copy unavailable — select the text manually.');} }
+function copyFeedback(){ if(!ui.markFeedback)return toast('Generate feedback first.'); const f=ui.markFeedback; copyText(`WWW: ${f.www}\n\nEBI: ${f.ebi}\n\nOverall: ${f.overall}\n\nIndicative Grade: ${f.grade}`); }
+function saveMarking(){
+  if(!ui.markFeedback) return toast('Generate feedback first.');
+  state.marking.unshift({id:uid('mark'),date:new Date().toISOString(),courseId:ui.course,courseName:course(ui.course).name,areaId:document.getElementById('markArea').value,learner:document.getElementById('markLearner').value.trim(),assessment:document.getElementById('markAssessment').value.trim(),evidence:document.getElementById('markEvidence').value,missing:document.getElementById('markMissing').value,resub:document.getElementById('markResub').value,...ui.markFeedback});
+  saveState(); renderMarking(); toast('Marking record saved.');
+}
+function prepareMarkingRequest(){
+  const prompt=`Mark this learner work using my normal WWW / EBI / Overall / Indicative Grade format. Be precise about missing evidence and do not invent evidence.\n\nCourse: ${course(ui.course).name}\nArea: ${areaById(ui.course,document.getElementById('markArea').value)?.title||''}\nAssessment: ${document.getElementById('markAssessment').value}\nLearner work/evidence:\n${document.getElementById('markEvidence').value}\n\nKnown missing/weak evidence:\n${document.getElementById('markMissing').value}`;
+  openIntelligenceWith(prompt,'Assessment & marking');
+}
+
+function renderBriefs(){
+  const areas=allCourseAreas(ui.course);
+  const areaId=ui.specUnitId && areas.some(a=>a.id===ui.specUnitId)?ui.specUnitId:areas[0].id;
+  document.getElementById('app').innerHTML=pageHead('Assignment Briefs','Build short, professional briefs mapped to the selected specification area.')+
+  `<div class="grid g2">
+    <div class="card">
+      <div class="form-grid">
+        <label><span class="label">Course</span><select id="briefCourse" onchange="RWH.briefCourseChanged()"><option value="digitalSkills" ${ui.course==='digitalSkills'?'selected':''}>${esc(C1)}</option><option value="tlevel" ${ui.course==='tlevel'?'selected':''}>${esc(C2)}</option></select></label>
+        <label><span class="label">Unit / area</span><select id="briefArea" onchange="RWH.briefAreaChanged(this.value)">${lessonAreaOptions(ui.course,areaId)}</select></label>
+        <label><span class="label">Assignment title</span><input id="briefTitle" placeholder="e.g. Programming Implementation Assignment"></label>
+        <label><span class="label">Hand-in date</span><input id="briefDue" type="date"></label>
+        <label class="full"><span class="label">Scenario / context</span><textarea id="briefScenario" placeholder="Keep this realistic and short. Example: You are a junior developer asked to produce evidence for a client solution."></textarea></label>
+      </div>
+      <div class="source-box" style="margin-top:12px"><b>Criteria to include</b><div id="briefCriteria">${renderBriefCriteria(ui.course,areaId)}</div></div>
+      <div class="toolbar"><button class="btn" onclick="RWH.generateBrief()">Generate brief</button><button class="btn secondary" onclick="RWH.saveBrief()">Save brief</button><button class="btn ghost" onclick="window.print()">Print / Save PDF</button></div>
+    </div>
+    <div class="card"><div class="card-title"><h3>Brief preview</h3><span class="pill">Student-ready</span></div><div id="briefPreview">${ui.briefPreview?renderBriefPreview(ui.briefPreview):'<div class="empty">Generate a brief to preview it here.</div>'}</div></div>
+  </div>`;
+}
+function renderBriefCriteria(courseId,areaId){
+  return unitCriteria(courseId,areaId).map(c=>`<label class="spec-criterion"><input type="checkbox" class="brief-criterion" value="${esc(c.code)}" checked><span><b>${esc(c.code)}</b> ${esc(c.text)}</span></label>`).join('');
+}
+function briefCourseChanged(){ ui.course=document.getElementById('briefCourse').value; ui.specUnitId=allCourseAreas(ui.course)[0].id; renderBriefs(); }
+function briefAreaChanged(v){ ui.specUnitId=v; document.getElementById('briefCriteria').innerHTML=renderBriefCriteria(ui.course,v); }
+function generateBrief(){
+  const courseId=document.getElementById('briefCourse').value, areaId=document.getElementById('briefArea').value;
+  const title=document.getElementById('briefTitle').value.trim()||`${areaById(courseId,areaId)?.title||'Assignment'} Brief`;
+  const scenario=document.getElementById('briefScenario').value.trim()||'You are working in a junior digital role and have been asked to produce clear professional evidence that meets the requirements below.';
+  const due=document.getElementById('briefDue').value;
+  const selected=[...document.querySelectorAll('.brief-criterion:checked')].map(x=>x.value);
+  const all=unitCriteria(courseId,areaId).filter(c=>selected.includes(c.code));
+  const groups={}; all.forEach(c=>{const k=c.code.includes('.')?c.code.split('.')[0]:'1';(groups[k]||(groups[k]=[])).push(c);});
+  const tasks=Object.keys(groups).map((k,i)=>({title:`Task ${i+1}`,criteria:groups[k],instruction:`Produce evidence that fully addresses ${groups[k].map(c=>c.code).join(', ')}. Use correct technical terminology, clear explanations and suitable screenshots/diagrams/testing evidence where the task requires them.`}));
+  ui.briefPreview={id:uid('brief'),courseId,courseName:course(courseId).name,areaId,areaTitle:areaById(courseId,areaId)?.title||'',title,scenario,due,tasks,created:new Date().toISOString()};
+  document.getElementById('briefPreview').innerHTML=renderBriefPreview(ui.briefPreview);
+}
+function renderBriefPreview(b){
+  return `<div style="border-top:7px solid var(--orange);padding-top:12px"><div class="small muted">Oldham College · Faculty of Digital & Creative</div><h2>${esc(b.title)}</h2><div class="item"><b>Course</b><div>${esc(b.courseName)}</div><b>Unit / area</b><div>${esc(b.areaTitle)}</div>${b.due?`<b>Hand-in</b><div>${fmtDate(b.due)}</div>`:''}</div><h3 style="margin-top:14px">Scenario</h3><p>${esc(b.scenario)}</p><h3>Assessment tasks</h3>${b.tasks.map(t=>`<div class="item" style="margin-top:8px"><b>${esc(t.title)}</b><p>${esc(t.instruction)}</p><div class="chips">${t.criteria.map(c=>`<span class="pill">${esc(c.code)}</span>`).join('')}</div></div>`).join('')}<div class="note" style="margin-top:12px"><b>Submission standard:</b> your work must be your own, clearly presented, proofread and include the evidence requested in each task.</div></div>`;
+}
+function saveBrief(){ if(!ui.briefPreview)return toast('Generate a brief first.'); state.briefs.unshift(JSON.parse(JSON.stringify(ui.briefPreview))); saveState(); toast('Brief saved.'); }
+
+function renderLearners(){
+  const q='';
+  document.getElementById('app').innerHTML=pageHead('Learners','Local learner records, support notes and quick follow-up flags.')+
+  `<div class="grid g2">
+    <div class="card">
+      <div class="form-grid">
+        <label><span class="label">Learner reference</span><input id="learnerRef" placeholder="Initials / internal reference"></label>
+        <label><span class="label">Course</span><select id="learnerCourse"><option value="digitalSkills">${esc(C1)}</option><option value="tlevel">${esc(C2)}</option></select></label>
+        <label><span class="label">Attendance %</span><input id="learnerAttendance" type="number" min="0" max="100"></label>
+        <label><span class="label">Risk / support flag</span><select id="learnerRisk"><option>None</option><option>Monitor</option><option>High</option></select></label>
+        <label class="full"><span class="label">Strengths / progress</span><textarea id="learnerStrengths"></textarea></label>
+        <label class="full"><span class="label">Support / actions</span><textarea id="learnerSupport"></textarea></label>
+      </div>
+      <div class="toolbar"><button class="btn" onclick="RWH.addLearner()">Save learner</button></div>
+    </div>
+    <div class="card">
+      <div class="search-box"><input id="learnerSearch" placeholder="Search learner records" oninput="RWH.filterLearners(this.value)"></div>
+      <div id="learnerList" class="list" style="margin-top:12px">${renderLearnerList(q)}</div>
+    </div>
+  </div>`;
+}
+function renderLearnerList(q){
+  const list=state.learners.filter(l=>!q || (l.ref+' '+l.support+' '+l.strengths).toLowerCase().includes(q.toLowerCase()));
+  return list.length?list.map(l=>`<div class="item"><div style="display:flex;justify-content:space-between;gap:10px"><b>${esc(l.ref)}</b><span class="pill ${l.risk==='High'?'red':l.risk==='Monitor'?'':'green'}">${esc(l.risk||'None')}</span></div><div class="small muted">${esc(course(l.courseId)?.name||'')} · Attendance ${Number(l.attendance||0)}%</div>${l.strengths?`<div class="small" style="margin-top:5px"><b>Strengths:</b> ${esc(l.strengths)}</div>`:''}${l.support?`<div class="small"><b>Actions:</b> ${esc(l.support)}</div>`:''}<div class="toolbar"><button class="btn ghost smallbtn" onclick="RWH.startOneToOne('${l.id}')">1:1</button><button class="btn ghost smallbtn" onclick="RWH.startProgression('${l.id}')">Progression</button><button class="btn danger smallbtn" onclick="RWH.deleteLearner('${l.id}')">Delete</button></div></div>`).join(''):'<div class="empty">No learner records yet.</div>';
+}
+function addLearner(){
+  const ref=document.getElementById('learnerRef').value.trim(); if(!ref)return toast('Add a learner reference.');
+  state.learners.unshift({id:uid('learner'),ref,courseId:document.getElementById('learnerCourse').value,attendance:Number(document.getElementById('learnerAttendance').value||0),risk:document.getElementById('learnerRisk').value,strengths:document.getElementById('learnerStrengths').value.trim(),support:document.getElementById('learnerSupport').value.trim(),date:new Date().toISOString()});
+  saveState(); renderLearners(); toast('Learner saved.');
+}
+function filterLearners(v){ document.getElementById('learnerList').innerHTML=renderLearnerList(v); }
+function deleteLearner(id){ if(!confirm('Delete this local learner record?'))return; state.learners=state.learners.filter(l=>l.id!==id); saveState(); renderLearners(); }
+
+function learnerOptions(selected=''){ return state.learners.map(l=>`<option value="${l.id}" ${l.id===selected?'selected':''}>${esc(l.ref)} — ${esc(course(l.courseId)?.name||'')}</option>`).join(''); }
+
+function renderAttendance(){
+  document.getElementById('app').innerHTML=pageHead('Attendance','Record a session and keep a simple local attendance trail.')+
+  `<div class="grid g2">
+    <div class="card">
+      <div class="form-grid"><label><span class="label">Date</span><input id="attDate" type="date" value="${today()}"></label><label><span class="label">Course</span><select id="attCourse" onchange="RWH.renderAttendanceRows()"><option value="digitalSkills">${esc(C1)}</option><option value="tlevel">${esc(C2)}</option></select></label><label class="full"><span class="label">Session / lesson</span><input id="attSession" placeholder="e.g. Ethical Hacking Lesson 3"></label></div>
+      <div id="attRows" style="margin-top:12px">${renderAttendanceRowsHtml('digitalSkills')}</div>
+      <div class="toolbar"><button class="btn" onclick="RWH.saveAttendance()">Save session</button></div>
+    </div>
+    <div class="card"><h3>Recent sessions</h3>${state.attendance.length?`<div class="list" style="margin-top:8px">${state.attendance.slice(0,8).map(a=>`<div class="item"><b>${fmtDate(a.date)} · ${esc(a.session||'Session')}</b><div class="small muted">${esc(course(a.courseId)?.name||'')} · ${a.entries.length} learners</div><div class="chips" style="margin-top:6px"><span class="pill green">${a.entries.filter(x=>x.status==='Present').length} present</span><span class="pill red">${a.entries.filter(x=>x.status==='Absent').length} absent</span></div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:8px">No attendance sessions saved.</div>'}</div>
+  </div>`;
+}
+function renderAttendanceRowsHtml(courseId){
+  const list=state.learners.filter(l=>l.courseId===courseId);
+  if(!list.length)return '<div class="empty">Add learners for this course first.</div>';
+  return `<div class="table-wrap"><table><thead><tr><th>Learner</th><th>Status</th><th>Note</th></tr></thead><tbody>${list.map(l=>`<tr><td>${esc(l.ref)}</td><td><select class="att-status" data-learner="${l.id}"><option>Present</option><option>Late</option><option>Authorised</option><option>Absent</option></select></td><td><input class="att-note" data-learner="${l.id}" placeholder="Optional note"></td></tr>`).join('')}</tbody></table></div>`;
+}
+function renderAttendanceRows(){ const c=document.getElementById('attCourse').value; document.getElementById('attRows').innerHTML=renderAttendanceRowsHtml(c); }
+function saveAttendance(){
+  const courseId=document.getElementById('attCourse').value;
+  const entries=[...document.querySelectorAll('.att-status')].map(s=>({learnerId:s.dataset.learner,status:s.value,note:document.querySelector(`.att-note[data-learner="${s.dataset.learner}"]`)?.value||''}));
+  if(!entries.length)return toast('No learners to record.');
+  state.attendance.unshift({id:uid('att'),date:document.getElementById('attDate').value,courseId,session:document.getElementById('attSession').value.trim(),entries});
+  entries.forEach(e=>{ const l=state.learners.find(x=>x.id===e.learnerId); if(l && e.status==='Absent' && Number(l.attendance||100)>0) l.risk=l.risk==='High'?'High':'Monitor'; });
+  saveState(); renderAttendance(); toast('Attendance saved.');
+}
+
+function renderOneToOnes(selected=''){
+  document.getElementById('app').innerHTML=pageHead('1:1s','Record concise catch-ups, targets and follow-up actions.')+
+  `<div class="grid g2"><div class="card"><label><span class="label">Learner</span><select id="oneLearner"><option value="">Select learner</option>${learnerOptions(selected)}</select></label><label><span class="label">Date</span><input id="oneDate" type="date" value="${today()}"></label><label><span class="label">What is going well?</span><textarea id="oneWWW"></textarea></label><label><span class="label">Main issue / discussion</span><textarea id="oneIssue"></textarea></label><label><span class="label">Agreed actions / target</span><textarea id="oneAction"></textarea></label><label><span class="label">Review date</span><input id="oneReview" type="date"></label><div class="toolbar"><button class="btn" onclick="RWH.saveOneToOne()">Save 1:1</button></div></div>
+  <div class="card"><h3>Recent 1:1 records</h3>${state.oneToOnes.length?`<div class="list" style="margin-top:8px">${state.oneToOnes.slice(0,10).map(o=>`<div class="item"><b>${esc(state.learners.find(l=>l.id===o.learnerId)?.ref||'Learner')} · ${fmtDate(o.date)}</b><div class="small">${esc(o.action)}</div><div class="small muted">Review: ${fmtDate(o.review)}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:8px">No 1:1 records yet.</div>'}</div></div>`;
+}
+function startOneToOne(id){ ui.page='oneToOnes'; renderOneToOnes(id); renderNav(); }
+function saveOneToOne(){
+  const learnerId=document.getElementById('oneLearner').value;if(!learnerId)return toast('Select a learner.');
+  state.oneToOnes.unshift({id:uid('one'),learnerId,date:document.getElementById('oneDate').value,www:document.getElementById('oneWWW').value.trim(),issue:document.getElementById('oneIssue').value.trim(),action:document.getElementById('oneAction').value.trim(),review:document.getElementById('oneReview').value});
+  saveState(); renderOneToOnes(); toast('1:1 saved.');
+}
+
+function renderProgression(selected=''){
+  document.getElementById('app').innerHTML=pageHead('Progression & Transfers','Track progression conversations, intended destinations and transfer actions.')+
+  `<div class="grid g2"><div class="card"><label><span class="label">Learner</span><select id="progLearner"><option value="">Select learner</option>${learnerOptions(selected)}</select></label><div class="form-grid"><label><span class="label">Route / destination</span><input id="progRoute" placeholder="e.g. T Level, apprenticeship, HE, employment"></label><label><span class="label">Status</span><select id="progStatus"><option>Exploring</option><option>Interested</option><option>Application in progress</option><option>Confirmed</option><option>Transfer requested</option><option>Withdrawn</option></select></label></div><label><span class="label">Notes / evidence</span><textarea id="progNotes"></textarea></label><label><span class="label">Next action</span><input id="progAction"></label><div class="toolbar"><button class="btn" onclick="RWH.saveProgression()">Save progression record</button></div></div>
+  <div class="card"><h3>Progression records</h3>${state.progression.length?`<div class="list" style="margin-top:8px">${state.progression.map(p=>`<div class="item"><b>${esc(state.learners.find(l=>l.id===p.learnerId)?.ref||'Learner')} · ${esc(p.route)}</b><div class="meta"><span class="pill">${esc(p.status)}</span></div><div class="small">${esc(p.notes||'')}</div><div class="small muted">Next: ${esc(p.action||'')}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:8px">No progression records yet.</div>'}</div></div>`;
+}
+function startProgression(id){ ui.page='progression'; renderProgression(id); renderNav(); }
+function saveProgression(){
+  const learnerId=document.getElementById('progLearner').value;if(!learnerId)return toast('Select a learner.');
+  state.progression.unshift({id:uid('prog'),learnerId,route:document.getElementById('progRoute').value.trim(),status:document.getElementById('progStatus').value,notes:document.getElementById('progNotes').value.trim(),action:document.getElementById('progAction').value.trim(),date:new Date().toISOString()});
+  saveState(); renderProgression(); toast('Progression record saved.');
+}
+
+function renderPlanner(){
+  const open=state.tasks.filter(t=>!t.done).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999'));
+  const done=state.tasks.filter(t=>t.done).slice(0,8);
+  document.getElementById('app').innerHTML=pageHead('Weekly Planner','Teaching, assessment and admin actions in one priority list.')+
+  `<div class="grid g2"><div class="card"><div class="form-grid"><label class="full"><span class="label">Task</span><input id="taskText" placeholder="What needs doing?"></label><label><span class="label">Due date</span><input id="taskDate" type="date"></label><label><span class="label">Priority</span><select id="taskPriority"><option>Normal</option><option>High</option><option>Urgent</option></select></label><label><span class="label">Course / area</span><select id="taskCourse"><option value="">General</option><option value="digitalSkills">${esc(C1)}</option><option value="tlevel">${esc(C2)}</option></select></label></div><div class="toolbar"><button class="btn" onclick="RWH.addTask()">Add task</button></div></div>
+  <div class="card"><div class="card-title"><h3>Open actions</h3><span class="pill gray">${open.length}</span></div>${open.length?`<div class="list">${open.map(t=>`<div class="item"><label style="display:flex;gap:9px"><input type="checkbox" style="width:auto" onchange="RWH.toggleTask('${t.id}',this.checked)"><span><b>${esc(t.text)}</b><div class="meta"><span class="pill ${t.priority==='Urgent'?'red':t.priority==='High'?'':'gray'}">${esc(t.priority)}</span><span class="small muted">${fmtDate(t.date)}</span></div></span></label></div>`).join('')}</div>`:'<div class="empty">No open tasks.</div>'}${done.length?`<h3 style="margin-top:16px">Recently completed</h3><div class="list" style="margin-top:8px">${done.map(t=>`<div class="item" style="opacity:.65"><s>${esc(t.text)}</s></div>`).join('')}</div>`:''}</div></div>`;
+}
+function addTask(){ const text=document.getElementById('taskText').value.trim();if(!text)return toast('Add a task.');state.tasks.unshift({id:uid('task'),text,date:document.getElementById('taskDate').value,priority:document.getElementById('taskPriority').value,courseId:document.getElementById('taskCourse').value,done:false,created:new Date().toISOString()});saveState();renderPlanner();toast('Task added.');}
+function toggleTask(id,on){const t=state.tasks.find(x=>x.id===id);if(t)t.done=on;saveState();renderPlanner();}
+
+function renderTimetable(){
+  const days=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+  document.getElementById('app').innerHTML=pageHead('Timetable','Build a simple working timetable for teaching, meetings and protected admin time.')+
+  `<div class="card"><div class="form-grid"><label><span class="label">Day</span><select id="ttDay">${days.map(d=>`<option>${d}</option>`).join('')}</select></label><label><span class="label">Start</span><input id="ttStart" type="time"></label><label><span class="label">End</span><input id="ttEnd" type="time"></label><label><span class="label">Room</span><input id="ttRoom" placeholder="e.g. B114"></label><label><span class="label">Type</span><select id="ttType"><option>Teaching</option><option>1:1 / tutorial</option><option>CPD</option><option>Meeting</option><option>Admin / planning</option></select></label><label><span class="label">Course / activity</span><input id="ttActivity"></label></div><div class="toolbar"><button class="btn" onclick="RWH.addTimetable()">Add slot</button></div></div>
+  <div class="grid g2" style="margin-top:14px">${days.map(day=>`<div class="card"><h3>${day}</h3><div class="list" style="margin-top:8px">${state.timetable.filter(x=>x.day===day).sort((a,b)=>a.start.localeCompare(b.start)).map(x=>`<div class="item"><b>${esc(x.start)}–${esc(x.end)} · ${esc(x.activity)}</b><div class="small muted">${esc(x.type)} · ${esc(x.room||'Room TBC')}</div></div>`).join('')||'<div class="empty">No slots.</div>'}</div></div>`).join('')}</div>`;
+}
+function addTimetable(){ const activity=document.getElementById('ttActivity').value.trim();if(!activity)return toast('Add an activity.');state.timetable.push({id:uid('tt'),day:document.getElementById('ttDay').value,start:document.getElementById('ttStart').value,end:document.getElementById('ttEnd').value,room:document.getElementById('ttRoom').value.trim(),type:document.getElementById('ttType').value,activity});saveState();renderTimetable();toast('Timetable slot added.');}
+
+function renderRooms(){
+  document.getElementById('app').innerHTML=pageHead('Rooms & Equipment','Log room, laptop and equipment issues so recurring problems are visible.')+
+  `<div class="grid g2"><div class="card"><div class="form-grid"><label><span class="label">Room</span><input id="roomName" placeholder="e.g. A306"></label><label><span class="label">Issue type</span><select id="roomType"><option>PC capacity</option><option>Laptops</option><option>Battery / charging</option><option>Display / projector</option><option>Network</option><option>Room capacity</option><option>Other</option></select></label><label class="full"><span class="label">Issue</span><textarea id="roomIssue"></textarea></label><label><span class="label">Status</span><select id="roomStatus"><option>Open</option><option>Workaround in place</option><option>Reported</option><option>Resolved</option></select></label><label><span class="label">Date</span><input id="roomDate" type="date" value="${today()}"></label></div><div class="toolbar"><button class="btn" onclick="RWH.addRoomIssue()">Log issue</button></div></div>
+  <div class="card"><h3>Issue log</h3>${state.rooms.length?`<div class="list" style="margin-top:8px">${state.rooms.map(r=>`<div class="item"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(r.room)} · ${esc(r.type)}</b><span class="pill ${r.status==='Resolved'?'green':r.status==='Open'?'red':''}">${esc(r.status)}</span></div><div class="small">${esc(r.issue)}</div><div class="small muted">${fmtDate(r.date)}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:8px">No room issues logged.</div>'}</div></div>`;
+}
+function addRoomIssue(){ const room=document.getElementById('roomName').value.trim(),issue=document.getElementById('roomIssue').value.trim();if(!room||!issue)return toast('Add the room and issue.');state.rooms.unshift({id:uid('room'),room,type:document.getElementById('roomType').value,issue,status:document.getElementById('roomStatus').value,date:document.getElementById('roomDate').value});saveState();renderRooms();toast('Room issue logged.');}
+
+function renderEmployers(){
+  document.getElementById('app').innerHTML=pageHead('Employer Engagement','Track guest speakers, visits, briefs, apprenticeship activity and follow-up.')+
+  `<div class="grid g2"><div class="card"><div class="form-grid"><label><span class="label">Employer / organisation</span><input id="empName"></label><label><span class="label">Type</span><select id="empType"><option>Guest talk</option><option>Site visit</option><option>Employer brief</option><option>Apprenticeship engagement</option><option>Hack / innovation day</option><option>Other</option></select></label><label><span class="label">Date</span><input id="empDate" type="date"></label><label><span class="label">Course</span><select id="empCourse"><option value="digitalSkills">${esc(C1)}</option><option value="tlevel">${esc(C2)}</option><option value="">Both</option></select></label><label class="full"><span class="label">Details / learner value</span><textarea id="empDetails"></textarea></label><label class="full"><span class="label">Follow-up</span><input id="empFollow"></label></div><div class="toolbar"><button class="btn" onclick="RWH.addEmployer()">Save engagement</button></div></div>
+  <div class="card"><h3>Engagement log</h3>${state.employers.length?`<div class="list" style="margin-top:8px">${state.employers.map(e=>`<div class="item"><b>${esc(e.name)} · ${esc(e.type)}</b><div class="small muted">${fmtDate(e.date)} · ${e.courseId?esc(course(e.courseId)?.name||''):'Both courses'}</div><div class="small">${esc(e.details||'')}</div><div class="small"><b>Follow-up:</b> ${esc(e.follow||'')}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:8px">No employer engagement saved yet.</div>'}</div></div>`;
+}
+function addEmployer(){const name=document.getElementById('empName').value.trim();if(!name)return toast('Add an employer / organisation.');state.employers.unshift({id:uid('emp'),name,type:document.getElementById('empType').value,date:document.getElementById('empDate').value,courseId:document.getElementById('empCourse').value,details:document.getElementById('empDetails').value.trim(),follow:document.getElementById('empFollow').value.trim()});saveState();renderEmployers();toast('Employer engagement saved.');}
+
+function renderResources(){
+  document.getElementById('app').innerHTML=pageHead('Resources','Keep links, files and teaching references easy to find.')+
+  `<div class="grid g2"><div class="card"><div class="form-grid"><label><span class="label">Title</span><input id="resTitle"></label><label><span class="label">Type</span><select id="resType"><option>Lesson</option><option>Worksheet</option><option>Specification</option><option>Website</option><option>Video</option><option>Assessment</option><option>Other</option></select></label><label><span class="label">Course</span><select id="resCourse"><option value="">Both / General</option><option value="digitalSkills">${esc(C1)}</option><option value="tlevel">${esc(C2)}</option></select></label><label><span class="label">Link / reference</span><input id="resLink" placeholder="URL, Drive reference or file note"></label><label class="full"><span class="label">Notes</span><textarea id="resNotes"></textarea></label></div><div class="toolbar"><button class="btn" onclick="RWH.addResource()">Add resource</button></div></div>
+  <div class="card"><div class="search-box"><input id="resSearch" placeholder="Search resources" oninput="RWH.filterResources(this.value)"></div><div id="resourceList" class="list" style="margin-top:12px">${renderResourceList('')}</div></div></div>`;
+}
+function renderResourceList(q){const list=state.resources.filter(r=>!q||(r.title+' '+r.type+' '+r.notes).toLowerCase().includes(q.toLowerCase()));return list.length?list.map(r=>`<div class="item"><b>${esc(r.title)}</b><div class="meta"><span class="pill gray">${esc(r.type)}</span>${r.courseId?`<span class="small muted">${esc(course(r.courseId)?.name||'')}</span>`:''}</div>${r.link?`<div class="small" style="margin-top:5px;word-break:break-all">${esc(r.link)}</div>`:''}<div class="small muted">${esc(r.notes||'')}</div></div>`).join(''):'<div class="empty">No resources saved.</div>';}
+function addResource(){const title=document.getElementById('resTitle').value.trim();if(!title)return toast('Add a resource title.');state.resources.unshift({id:uid('res'),title,type:document.getElementById('resType').value,courseId:document.getElementById('resCourse').value,link:document.getElementById('resLink').value.trim(),notes:document.getElementById('resNotes').value.trim()});saveState();renderResources();toast('Resource added.');}
+function filterResources(q){document.getElementById('resourceList').innerHTML=renderResourceList(q);}
+
+function renderComms(){
+  document.getElementById('app').innerHTML=pageHead('Emails & Logs','Draft concise professional communications and save a simple record.')+
+  `<div class="grid g2"><div class="card"><div class="form-grid"><label><span class="label">Type</span><select id="commType"><option>Email</option><option>Learner log</option><option>Parent contact log</option><option>Room request</option><option>Progression note</option></select></label><label><span class="label">Subject / heading</span><input id="commSubject"></label><label class="full"><span class="label">Key facts</span><textarea id="commFacts" placeholder="Write the facts in your own shorthand. The Hub will turn them into a concise professional draft."></textarea></label><label><span class="label">Tone</span><select id="commTone"><option>Professional and direct</option><option>Warm but professional</option><option>Very concise</option></select></label></div><div class="toolbar"><button class="btn" onclick="RWH.generateComm()">Generate draft</button></div></div>
+  <div class="card"><h3>Draft</h3><textarea id="commDraft" style="min-height:260px" placeholder="Generated draft will appear here."></textarea><div class="toolbar"><button class="btn secondary" onclick="RWH.copyComm()">Copy</button><button class="btn" onclick="RWH.saveComm()">Save log</button></div><div style="margin-top:16px"><h3>Recent saved communications</h3>${state.comms.length?`<div class="list" style="margin-top:8px">${state.comms.slice(0,6).map(c=>`<div class="item"><b>${esc(c.type)} · ${esc(c.subject||'No subject')}</b><div class="small muted">${new Date(c.date).toLocaleString('en-GB')}</div></div>`).join('')}</div>`:'<div class="empty" style="margin-top:8px">No saved communications.</div>'}</div></div></div>`;
+}
+function generateComm(){
+  const type=document.getElementById('commType').value,facts=document.getElementById('commFacts').value.trim(),tone=document.getElementById('commTone').value;
+  if(!facts)return toast('Add the key facts first.');
+  let draft='';
+  if(type==='Email'){
+    draft=`Hi,\n\n${facts.replace(/\n+/g,' ')}\n\nPlease let me know if you need any further information.\n\nThanks,\nRabiul`;
+  }else{
+    const subject=document.getElementById('commSubject').value.trim();
+    draft=`${subject?subject+': ':''}${facts.replace(/\n+/g,' ')}${facts.trim().endsWith('.')?'':'.'} Follow-up will be completed where required.`;
+  }
+  if(tone==='Very concise') draft=draft.replace('Please let me know if you need any further information.\n\n','');
+  document.getElementById('commDraft').value=draft;
+}
+function copyComm(){const t=document.getElementById('commDraft').value;if(!t)return toast('Generate a draft first.');copyText(t);}
+function saveComm(){const draft=document.getElementById('commDraft').value.trim();if(!draft)return toast('Generate a draft first.');state.comms.unshift({id:uid('comm'),type:document.getElementById('commType').value,subject:document.getElementById('commSubject').value.trim(),draft,date:new Date().toISOString()});saveState();renderComms();toast('Communication saved.');}
+
+function renderIntelligence(){
+  document.getElementById('app').innerHTML=pageHead('Intelligence Workspace','Build a context-rich request from the Hub and hand it to your preferred AI workspace without a separate API key.')+
+  `<div class="grid g2"><div class="card"><label><span class="label">Focus</span><select id="intelFocus"><option>Full Hub</option><option>Curriculum & coverage</option><option>Lessons & planning</option><option>Assessment & marking</option><option>Learner support</option><option>Admin & communications</option><option>Resources</option></select></label><label><span class="label">Request</span><textarea id="intelPrompt" placeholder="Example: Create the next Ethical Hacking lesson without repeating what is already covered."></textarea></label><div class="toolbar"><button class="btn" onclick="RWH.prepareIntel()">Prepare intelligent request</button><button class="btn secondary" onclick="RWH.shareIntel()">Share</button><button class="btn ghost" onclick="RWH.copyIntel()">Copy</button></div><label><span class="label">Prepared request</span><textarea id="intelPrepared" style="min-height:320px" readonly></textarea></label></div>
+  <div class="card"><h3>Active context</h3><div id="intelContext">${renderIntelContext()}</div><h3 style="margin-top:16px">Response Vault</h3><textarea id="vaultInput" placeholder="Paste a completed response here to keep it with the Hub."></textarea><div class="toolbar"><button class="btn secondary" onclick="RWH.saveVault()">Save response</button></div>${state.vault.length?`<div class="list" style="margin-top:10px">${state.vault.slice(0,6).map(v=>`<div class="item"><div class="small muted">${new Date(v.date).toLocaleString('en-GB')}</div>${esc(v.text).slice(0,450)}</div>`).join('')}</div>`:'<div class="empty" style="margin-top:10px">No saved responses yet.</div>'}</div></div>`;
+}
+function renderIntelContext(){
+  const ds=digitalCoverage(),tl=tlevelCoverage();
+  return `<div class="list"><div class="item"><b>Courses</b><div class="small muted">${esc(C1)} · ${esc(C2)}</div></div><div class="item"><b>Coverage</b><div class="small muted">Digital Skills ${ds.covered}/${ds.total} criteria · T Level ${tl.covered}/${tl.total} areas</div></div><div class="item"><b>Teaching profile</b><div class="small muted">${esc(state.style.split('\n').slice(0,4).join(' · '))}</div></div><div class="item"><b>Workspace records</b><div class="small muted">${state.lessons.length} lessons · ${state.marking.length} marking · ${state.learners.length} learners · ${state.tasks.filter(t=>!t.done).length} open tasks</div></div></div>`;
+}
+function intelSnapshot(focus){
+  const base={focus,courses:[C1,C2],teachingStyle:state.style,defaultLessonPrompt:state.prefs.defaultLessonPrompt,coverage:state.coverage};
+  if(focus==='Full Hub'||focus==='Lessons & planning'){base.recentLessons=state.lessons.slice(0,5);base.planner=state.tasks.filter(t=>!t.done).slice(0,12);}
+  if(focus==='Full Hub'||focus==='Assessment & marking'){base.recentMarking=state.marking.slice(0,8);base.savedBriefs=state.briefs.slice(0,5);}
+  if(focus==='Full Hub'||focus==='Learner support'){base.learners=state.learners.slice(0,30);base.oneToOnes=state.oneToOnes.slice(0,12);base.progression=state.progression.slice(0,12);}
+  if(focus==='Full Hub'||focus==='Admin & communications'){base.rooms=state.rooms.slice(0,10);base.employers=state.employers.slice(0,10);base.timetable=state.timetable;}
+  if(focus==='Curriculum & coverage'){base.digitalSkillsUnits=D.courses.digitalSkills.units; base.tlevel={core:D.courses.tlevel.core,os:D.courses.tlevel.os,assessment:D.courses.tlevel.assessment};}
+  if(focus==='Resources') base.resources=state.resources.slice(0,20);
+  return base;
+}
+function prepareIntel(){
+  const focus=document.getElementById('intelFocus').value,prompt=document.getElementById('intelPrompt').value.trim();if(!prompt)return toast('Add a request first.');
+  const prepared=`Use high reasoning effort.\n\nREQUEST\n${prompt}\n\nRABIUL WORK HUB CONTEXT\n${JSON.stringify(intelSnapshot(focus),null,2)}\n\nWORKING RULES\n- Treat the Hub context and official specification structure as the source of truth.\n- Keep wording concise, natural and professional.\n- For lessons, follow my Oldham College teaching style, use specification links and avoid repeating covered content.\n- For marking, use WWW / EBI / Overall / Indicative Grade and identify exact missing evidence.\n- Do not invent learner facts, specification points or evidence.\n- Give a finished usable output rather than generic advice.`;
+  document.getElementById('intelPrepared').value=prepared;
+}
+async function shareIntel(){let t=document.getElementById('intelPrepared').value;if(!t){prepareIntel();t=document.getElementById('intelPrepared').value;}if(!t)return;if(navigator.share){try{await navigator.share({title:'Rabiul Work Hub request',text:t});return;}catch(e){}}copyText(t);}
+function copyIntel(){const t=document.getElementById('intelPrepared').value;if(!t)return toast('Prepare a request first.');copyText(t);}
+function openIntelligenceWith(prompt,focus){
+  ui.page='intelligence'; render();
+  setTimeout(()=>{document.getElementById('intelFocus').value=focus||'Full Hub';document.getElementById('intelPrompt').value=prompt;prepareIntel();},0);
+}
+function saveVault(){const text=document.getElementById('vaultInput').value.trim();if(!text)return toast('Paste a response first.');state.vault.unshift({id:uid('vault'),date:new Date().toISOString(),text});saveState();renderIntelligence();toast('Response saved.');}
+
+function renderSettings(){
+  document.getElementById('app').innerHTML=pageHead('Settings','Teaching standards, backup and reliability controls.','<span class="pill green">Version '+esc(D.version)+'</span>')+
+  `<div class="grid g2"><div class="card"><h3>My teaching style</h3><p class="small muted">These rules are used by Lesson Studio and included in intelligent requests.</p><textarea id="settingsStyle" style="min-height:390px">${esc(state.style)}</textarea><label><span class="label">Default lesson improvement prompt</span><textarea id="settingsPrompt">${esc(state.prefs.defaultLessonPrompt||'')}</textarea></label><div class="toolbar"><button class="btn" onclick="RWH.saveSettings()">Save teaching style</button><button class="btn secondary" onclick="RWH.resetStyle()">Restore defaults</button></div></div>
+  <div class="card"><h3>Backup & data</h3><p class="small muted">Working data is stored locally in this browser. Export a backup before moving device or clearing browser data.</p><div class="toolbar"><button class="btn secondary" onclick="RWH.exportBackup()">Export JSON backup</button><button class="btn secondary" onclick="document.getElementById('backupFile').click()">Import backup</button><input id="backupFile" type="file" accept="application/json" style="display:none" onchange="RWH.importBackup(event)"><button class="btn danger" onclick="RWH.resetAll()">Reset local data</button></div><h3 style="margin-top:18px">Diagnostics</h3><div class="diag" id="diag">Run self-check to verify the main Hub functions.</div><div class="toolbar"><button class="btn secondary" onclick="RWH.selfCheck()">Run self-check</button></div><div class="source-box" style="margin-top:16px"><b>Data model</b><div class="small muted">Schema ${SCHEMA} · ${state.lessons.length} lessons · ${state.marking.length} marking records · ${state.learners.length} learners · ${Object.keys(state.coverage).length} coverage marks</div></div></div></div>`;
+}
+function saveSettings(){state.style=document.getElementById('settingsStyle').value.trim()||D.defaultTeachingStyle.join('\n');state.prefs.defaultLessonPrompt=document.getElementById('settingsPrompt').value.trim();saveState();toast('Settings saved.');}
+function resetStyle(){state.style=D.defaultTeachingStyle.join('\n');state.prefs.defaultLessonPrompt='Keep it natural, specification-linked, active and appropriately challenging.';saveState();renderSettings();toast('Teaching style restored.');}
+function exportBackup(){const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),version:D.version,state},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rabiul-work-hub-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function importBackup(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);state=migrate(x.state||x);saveState();toast('Backup imported.');setTimeout(()=>location.reload(),500);}catch(err){toast('Backup could not be imported.');}};r.readAsText(f);}
+function resetAll(){if(!confirm('Reset all locally stored Work Hub data on this browser? This cannot be undone without a backup.'))return;localStorage.removeItem(KEY);state=DEFAULT_STATE();saveState();location.reload();}
+function selfCheck(){
+  const checks=[];
+  checks.push(`Version: ${D.version}`);
+  try{localStorage.setItem('rwh2_test','1');localStorage.removeItem('rwh2_test');checks.push('Local storage: OK');}catch(e){checks.push('Local storage: FAILED');}
+  checks.push(`Course data: ${D.courses.digitalSkills.units.length===7 && D.courses.tlevel.core.length===8?'OK':'FAILED'}`);
+  checks.push(`Navigation: ${NAV.flatMap(x=>x[1]).length>=15?'OK':'FAILED'}`);
+  checks.push(`Lesson generator: ${typeof generateLesson==='function'?'OK':'FAILED'}`);
+  checks.push(`Marking workflow: ${typeof generateFeedback==='function'?'OK':'FAILED'}`);
+  checks.push(`Backup workflow: ${typeof exportBackup==='function'?'OK':'FAILED'}`);
+  checks.push(`Share support: ${navigator.share?'Available':'Copy fallback active'}`);
+  document.getElementById('diag').textContent=checks.join('\n');
+}
+
+Object.assign(window.RWH,{
+  openCourse,planSuggested,setCourse,openSpec,toggleCoverage,specCourseChanged,filterSpecs,selectSpec,planArea,
+  lessonCourseChanged,lessonAreaChanged,generateLesson,selectSlide,updateSelectedSlide,deleteSelectedSlide,addImprovePrompt,improveLesson,saveLesson,loadLesson,newLesson,printLesson,
+  markCourseChanged,markAreaChanged,generateFeedback,copyFeedback,saveMarking,prepareMarkingRequest,
+  briefCourseChanged,briefAreaChanged,generateBrief,saveBrief,
+  addLearner,filterLearners,deleteLearner,startOneToOne,startProgression,
+  renderAttendanceRows,saveAttendance,saveOneToOne,saveProgression,
+  addTask,toggleTask,addTimetable,addRoomIssue,addEmployer,addResource,filterResources,
+  generateComm,copyComm,saveComm,prepareIntel,shareIntel,copyIntel,saveVault,
+  saveSettings,resetStyle,exportBackup,importBackup,resetAll,selfCheck
+});
+
 render();
 })();
