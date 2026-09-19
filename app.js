@@ -143,15 +143,15 @@ function renderNav(){
     `<div class="nav-section">${esc(section)}</div>`+
     items.map(([id,label])=>`<button data-page="${id}" class="${ui.page===id?'active':''}" onclick="RWH.go('${id}')"><span class="dot"></span>${esc(label)}</button>`).join('')
   ).join('');
-  const mobile=[['dashboard','Home'],['curriculum','Courses'],['lesson','Lesson'],['marking','Mark'],['settings','More']];
+  const mobile=[['dashboard','Home'],['curriculum','Courses'],['lesson','Lesson'],['intelligence','Ask'],['settings','More']];
   document.getElementById('mobilebar').innerHTML=mobile.map(([id,label])=>`<button data-page="${id}" class="${ui.page===id?'active':''}" onclick="RWH.go('${id}')">${label}</button>`).join('');
 }
 function pageHead(title,subtitle,right=''){
   return `<div class="page-head"><div><button class="drawer-btn" onclick="RWH.toggleDrawer()">Menu</button><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>${right||''}</div>
   <div class="card" style="padding:10px 12px;margin-bottom:14px;box-shadow:none">
     <div style="display:flex;gap:8px;align-items:center">
-      <div class="search-box" style="flex:1"><input id="hubGlobalSearch" placeholder="Search the Hub or ask: what should I teach next?" onkeydown="if(event.key==='Enter') RWH.hubSearch(this.value)"></div>
-      <button class="btn secondary" onclick="RWH.hubSearch(document.getElementById('hubGlobalSearch').value)">Search / Ask</button>
+      <div class="search-box" style="flex:1"><input id="hubGlobalSearch" placeholder="Search the Hub or ask intelligence: what should I teach next?" onkeydown="if(event.key==='Enter') RWH.hubSearch(this.value)"></div>
+      <button class="btn secondary" onclick="RWH.hubSearch(document.getElementById('hubGlobalSearch').value)">Search / Ask Intelligence</button>
     </div>
   </div>`;
 }
