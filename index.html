@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Rabiul Work Hub</title>
+<style>
+:root{--bg:#f5f7fb;--panel:#fff;--ink:#1f2937;--muted:#667085;--line:#e5e7eb;--nav:#111827;--accent:#e87524;--accent2:#fff4e9;--good:#157f52;--danger:#b42318;--radius:16px;--shadow:0 10px 28px rgba(16,24,40,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Calibri,Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:grid;grid-template-columns:265px 1fr;min-height:100vh}.sidebar{background:var(--nav);color:white;padding:20px 14px;position:sticky;top:0;height:100vh;overflow:auto}.brand{font-size:22px;font-weight:800;margin:4px 8px 20px}.brand small{display:block;font-size:11px;font-weight:500;color:#cbd5e1;margin-top:4px}.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;color:#d0d5dd;text-align:left;padding:11px 12px;border-radius:10px}.nav button.active,.nav button:hover{background:#233044;color:white}.main{padding:24px;min-width:0}.page{display:none}.page.active{display:block}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:18px}.topbar h1{margin:0;font-size:30px}.topbar p{margin:6px 0 0;color:var(--muted)}.status{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);background:white;border-radius:999px;font-size:12px;font-weight:700}.status:before{content:"";width:8px;height:8px;border-radius:50%;background:#22a06b}.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}.card h3{margin:0 0 7px}.muted{color:var(--muted)}.small{font-size:12px}.kpi{font-size:30px;font-weight:800}.label{display:block;font-size:12px;font-weight:700;margin:0 0 6px}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.full{grid-column:1/-1}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:white;color:var(--ink)}textarea{min-height:90px;resize:vertical}.btn{border:0;border-radius:10px;padding:10px 13px;background:var(--accent);color:white;font-weight:800}.btn.secondary{background:white;color:var(--ink);border:1px solid var(--line)}.btn.ghost{background:#f8fafc;color:var(--ink);border:1px solid var(--line)}.btn.danger{background:#fff1f1;color:var(--danger);border:1px solid #f4c7c7}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.pill{display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--accent2);color:#9a4b12;font-size:11px;font-weight:800}.list{display:grid;gap:8px}.item{padding:11px;border:1px solid var(--line);border-radius:12px;background:#fbfcfe}.progress{height:8px;background:#eef1f5;border-radius:999px;overflow:hidden}.progress span{display:block;height:100%;background:var(--accent)}.course-card h3{margin-bottom:5px}.course-meta{display:flex;justify-content:space-between;gap:10px;align-items:center}.spec-layout{display:grid;grid-template-columns:300px 1fr;gap:14px}.spec-menu{display:grid;gap:6px;max-height:600px;overflow:auto}.spec-menu button{padding:10px;border:1px solid var(--line);background:white;border-radius:10px;text-align:left}.spec-menu button.active{background:var(--accent2);border-color:#f4bd94}.criterion{padding:10px 11px;border:1px solid var(--line);border-radius:10px;margin-bottom:7px;background:#fbfcfe}.lesson-shell{display:grid;grid-template-columns:210px minmax(0,1fr) 330px;gap:14px;align-items:start}.thumbs{display:grid;gap:8px;max-height:640px;overflow:auto}.thumb{border:1px solid var(--line);background:white;border-radius:10px;padding:9px;text-align:left}.thumb.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(232,117,36,.12)}.thumb b{display:block;font-size:12px}.thumb small{color:var(--muted)}.slide-stage{background:#e9edf3;padding:18px;border-radius:14px}.slide{aspect-ratio:16/9;background:#fffdf9;border:1px solid #ead9c8;box-shadow:0 14px 36px rgba(16,24,40,.12);position:relative;padding:50px 52px 44px;overflow:hidden}.slide:before{content:"";position:absolute;top:0;left:0;right:0;height:10px;background:var(--accent)}.slide-head{position:absolute;top:18px;left:28px;right:28px;display:flex;justify-content:space-between;font-size:11px;color:#5d6470}.slide h2{font-size:32px;margin:4px 0 14px;line-height:1.05}.slide .tag{display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#a55418;margin-bottom:8px}.slide .body{font-size:18px;line-height:1.38;white-space:pre-wrap}.slide-foot{position:absolute;left:28px;right:28px;bottom:15px;border-top:1px solid #f0dfd1;padding-top:6px;display:flex;justify-content:space-between;font-size:10px;color:#7b7f87}.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{padding:7px 9px;border:1px solid var(--line);border-radius:999px;background:white;font-size:11px;font-weight:700}.stylebox{background:#fffaf5;border:1px solid #f3d4bd;border-radius:12px;padding:12px;font-size:12px;line-height:1.45}.promptbox{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:12px}.diag{font-family:ui-monospace,monospace;font-size:12px;background:#101828;color:#d0d5dd;border-radius:10px;padding:12px;white-space:pre-wrap}.mobilebar{display:none}
+@media(max-width:1100px){.lesson-shell{grid-template-columns:160px 1fr}.lesson-side{grid-column:1/-1}.spec-layout{grid-template-columns:1fr}}
+@media(max-width:760px){.app{display:block}.sidebar{display:none}.main{padding:14px 12px 78px}.topbar{display:grid}.topbar h1{font-size:24px}.g2,.g3,.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.lesson-shell{display:block}.thumbs{display:flex;overflow:auto;margin-bottom:10px}.thumb{min-width:150px}.slide-stage{padding:8px}.slide{padding:40px 26px 38px}.slide h2{font-size:23px}.slide .body{font-size:14px}.lesson-side{margin-top:12px}.mobilebar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:#111827;z-index:20;padding:7px 5px}.mobilebar button{border:0;background:transparent;color:#cbd5e1;font-size:10px;padding:8px 2px}.mobilebar button.active{color:white;font-weight:800}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="brand">Rabiul Work Hub<small>Teaching & specification intelligence</small></div>
+<div class="nav" id="nav">
+<button data-page="dashboard" class="active">Dashboard</button>
+<button data-page="courses">Courses</button>
+<button data-page="specs">Specifications</button>
+<button data-page="lesson">Lesson Studio</button>
+<button data-page="intelligence">Intelligence</button>
+<button data-page="planner">Planner</button>
+<button data-page="learners">Learners</button>
+<button data-page="settings">Settings</button>
+</div>
+</aside>
+<main class="main">
+<section id="dashboard" class="page active">
+<div class="topbar"><div><h1>Dashboard</h1><p>Your teaching, curriculum, lesson and planning workspace.</p></div><span class="status">Local workspace ready</span></div>
+<div class="grid g3">
+<div class="card"><div class="muted small">Courses</div><div class="kpi">2</div><div class="small muted">Both course structures loaded</div></div>
+<div class="card"><div class="muted small">Saved lessons</div><div class="kpi" id="kpiLessons">0</div><div class="small muted">Stored on this device</div></div>
+<div class="card"><div class="muted small">Planner tasks</div><div class="kpi" id="kpiTasks">0</div><div class="small muted">Upcoming work</div></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+<div class="card"><h3>Digital Skills for Work Level 3</h3><p class="muted small">Gateway Software Development source extract loaded with 7 official units.</p><div class="toolbar"><button class="btn secondary" onclick="go('courses')">Open course</button><button class="btn ghost" onclick="openLessonFor('Digital Skills for Work Level 3','Programming Implementation')">Plan lesson</button></div></div>
+<div class="card"><h3>T Level Digital Software Development Year 1</h3><p class="muted small">Core, Employer Set Project and Occupational Specialism structure loaded.</p><div class="toolbar"><button class="btn secondary" onclick="go('courses')">Open course</button><button class="btn ghost" onclick="openLessonFor('T Level Digital Software Development Year 1','Content Area 2: Introduction to programming')">Plan lesson</button></div></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>Teaching style in use</h3><div class="stylebox" id="dashStyle"></div></div>
+</section>
+
+<section id="courses" class="page">
+<div class="topbar"><div><h1>Courses</h1><p>Exact course names, specification structure and delivery tracking.</p></div></div>
+<div id="courseCards" class="grid g2"></div>
+<div id="courseDetail" class="card" style="margin-top:14px"></div>
+</section>
+
+<section id="specs" class="page">
+<div class="topbar"><div><h1>Specifications & Coverage</h1><p>Official source structure with editable coverage notes.</p></div><span class="status">2 sources loaded</span></div>
+<div class="card" style="margin-bottom:14px">
+<div class="formgrid"><label><span class="label">Course</span><select id="specCourse"></select></label><label><span class="label">Search specification</span><input id="specSearch" placeholder="e.g. testing, variables, security"></label></div>
+</div>
+<div class="spec-layout">
+<div class="card"><div id="specMenu" class="spec-menu"></div></div>
+<div class="card"><div id="specDetail"></div></div>
+</div>
+</section>
+
+<section id="lesson" class="page">
+<div class="topbar"><div><h1>Lesson Studio</h1><p>Oldham College template, your teaching style and prompt-driven improvements.</p></div><span class="pill">Oldham template active</span></div>
+<div class="card" style="margin-bottom:14px">
+<div class="formgrid">
+<label><span class="label">Course</span><select id="lessonCourse"></select></label>
+<label><span class="label">Unit / content area</span><select id="lessonUnit"></select></label>
+<label><span class="label">Topic</span><input id="lessonTopic" placeholder="Lesson topic"></label>
+<label><span class="label">Duration</span><select id="lessonDuration"><option>210 minutes</option><option>180 minutes</option><option>120 minutes</option></select></label>
+<label><span class="label">Slide count</span><select id="lessonCount"><option>20</option><option>16</option><option>12</option><option>24</option></select></label>
+<label><span class="label">Mode</span><select id="lessonMode"><option>Balanced theory + activity</option><option>100% theoretical</option><option>Programming practical</option><option>Assessment preparation</option></select></label>
+<label><span class="label">Grouping</span><select id="lessonGrouping"><option>Mixed</option><option>Pairs</option><option>Groups of 3</option><option>Individual</option></select></label>
+<label><span class="label">Task frequency</span><select id="lessonFreq"><option value="2">Task after every 2 teaching slides</option><option value="3">Task after every 3 teaching slides</option><option value="1">Task after every teaching slide</option></select></label>
+<label class="full"><span class="label">Improvement prompt before generation</span><textarea id="lessonPrompt" placeholder="Example: 100% theoretical, no code, groups of 3, make tasks more advanced and link every section to the specification."></textarea></label>
+</div>
+<div class="toolbar"><button class="btn" onclick="generateLesson()">Generate lesson</button><button class="btn secondary" onclick="saveLesson()">Save lesson</button><button class="btn ghost" onclick="newLesson()">New</button></div>
+</div>
+
+<div class="lesson-shell">
+<div class="card"><div class="small muted" style="margin-bottom:8px">Slides</div><div id="thumbs" class="thumbs"></div></div>
+<div class="slide-stage"><div id="slidePreview"></div></div>
+<div class="lesson-side">
+<div class="card"><h3>Lesson Standards</h3><div class="stylebox" id="lessonStandards"></div></div>
+<div class="card" style="margin-top:12px"><h3>Improve Current Lesson</h3><div class="promptbox"><textarea id="improvePrompt" placeholder="Tell the Hub what to improve. Example: Make tasks more advanced, remove code, add model answers, groups of 3."></textarea><div class="chips" style="margin-top:8px">
+<button class="chip" onclick="quickPrompt('Shorter')">Shorter</button>
+<button class="chip" onclick="quickPrompt('More advanced')">More advanced</button>
+<button class="chip" onclick="quickPrompt('Theory only, no code')">Theory only</button>
+<button class="chip" onclick="quickPrompt('Groups of 3')">Groups of 3</button>
+<button class="chip" onclick="quickPrompt('Paired task')">Paired task</button>
+<button class="chip" onclick="quickPrompt('Model answer')">Model answer</button>
+<button class="chip" onclick="quickPrompt('Exam-style task')">Exam-style task</button>
+<button class="chip" onclick="quickPrompt('Task every 2 slides')">Task every 2</button>
+<button class="chip" onclick="quickPrompt('Recap plus extension')">Recap + extension</button>
+</div><div class="toolbar"><button class="btn" onclick="applyImprovement(false)">Improve whole lesson</button><button class="btn secondary" onclick="applyImprovement(true)">Improve selected slide</button></div></div></div>
+<div class="card" style="margin-top:12px"><h3>Edit selected slide</h3><label><span class="label">Type</span><select id="editType"><option>New learning</option><option>Task</option><option>Worked example</option><option>Recap</option><option>Assessment</option><option>Title</option></select></label><label><span class="label">Title</span><input id="editTitle"></label><label><span class="label">Content</span><textarea id="editBody"></textarea></label><div class="toolbar"><button class="btn secondary" onclick="updateSelectedSlide()">Update slide</button></div></div>
+</div>
+</div>
+</section>
+
+<section id="intelligence" class="page">
+<div class="topbar"><div><h1>Intelligence Workspace</h1><p>Prepare a context-rich request from your Hub data and hand it to your preferred AI workspace.</p></div></div>
+<div class="grid g2">
+<div class="card"><label><span class="label">Focus</span><select id="intelFocus"><option>Full Hub</option><option>Curriculum & coverage</option><option>Lessons & planning</option><option>Learner support</option><option>Assessment & marking</option><option>Resources</option></select></label><label><span class="label">Request</span><textarea id="intelPrompt" placeholder="Example: Create the next Ethical Hacking lesson without repeating covered content."></textarea></label><div class="toolbar"><button class="btn" onclick="prepareRequest()">Prepare request</button><button class="btn secondary" onclick="shareRequest()">Share</button><button class="btn ghost" onclick="copyPrepared()">Copy</button></div><label><span class="label">Prepared request</span><textarea id="prepared" readonly style="min-height:260px"></textarea></label></div>
+<div class="card"><h3>Response Vault</h3><p class="small muted">Paste a completed response here and save it for later reference.</p><textarea id="vaultInput" placeholder="Paste completed response"></textarea><div class="toolbar"><button class="btn secondary" onclick="saveVault()">Save response</button></div><div id="vaultList" class="list" style="margin-top:12px"></div></div>
+</div>
+</section>
+
+<section id="planner" class="page">
+<div class="topbar"><div><h1>Weekly Planner</h1><p>Keep teaching and admin tasks together.</p></div></div>
+<div class="grid g2"><div class="card"><label><span class="label">Task</span><input id="taskText"></label><label><span class="label">Due date</span><input id="taskDate" type="date"></label><div class="toolbar"><button class="btn" onclick="addTask()">Add task</button></div></div><div class="card"><h3>Tasks</h3><div id="taskList" class="list"></div></div></div>
+</section>
+
+<section id="learners" class="page">
+<div class="topbar"><div><h1>Learners</h1><p>Simple local learner records. Use initials or internal references where appropriate.</p></div></div>
+<div class="grid g2"><div class="card"><label><span class="label">Learner reference</span><input id="learnerName"></label><label><span class="label">Course</span><select id="learnerCourse"></select></label><label><span class="label">Attendance %</span><input id="learnerAttendance" type="number" min="0" max="100"></label><label><span class="label">Note</span><textarea id="learnerNote"></textarea></label><div class="toolbar"><button class="btn" onclick="addLearner()">Save learner</button></div></div><div class="card"><h3>Saved learners</h3><div id="learnerList" class="list"></div></div></div>
+</section>
+
+<section id="settings" class="page">
+<div class="topbar"><div><h1>Settings</h1><p>Your teaching style, backup and app diagnostics.</p></div></div>
+<div class="grid g2">
+<div class="card"><h3>My teaching style</h3><textarea id="styleText" style="min-height:320px"></textarea><div class="toolbar"><button class="btn" onclick="saveStyle()">Save style</button><button class="btn secondary" onclick="resetStyle()">Reset defaults</button></div></div>
+<div class="card"><h3>Backup & diagnostics</h3><div class="toolbar"><button class="btn secondary" onclick="exportData()">Export backup</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">Import backup</button><input id="importFile" type="file" accept="application/json" style="display:none" onchange="importData(event)"><button class="btn danger" onclick="resetData()">Reset local data</button></div><h3 style="margin-top:18px">Diagnostics</h3><div id="diag" class="diag">Not run yet.</div><div class="toolbar"><button class="btn secondary" onclick="runSelfCheck()">Run self-check</button></div></div>
+</div>
+</section>
+</main>
+</div>
+<nav class="mobilebar" id="mobilebar">
+<button data-page="dashboard" class="active">Home</button><button data-page="courses">Courses</button><button data-page="lesson">Lesson</button><button data-page="specs">Specs</button><button data-page="settings">More</button>
+</nav>
+
+<script>
+(function(){
+'use strict';
+var VERSION='1.0.0-live';
+var COURSE1='Digital Skills for Work Level 3';
+var COURSE2='T Level Digital Software Development Year 1';
+var DEFAULT_STYLE=[
+'Use concise, natural, professional language and avoid obvious AI phrasing.',
+'Keep one clear concept per slide wherever practical.',
+'Normally use two teaching slides followed by an active task.',
+'Start with a Do Now/retrieval activity and clear learning objectives.',
+'Link content to specification or assessment criteria when available.',
+'Use paired work, individual tasks and groups of 3 when suitable.',
+'Use realistic college, workplace and digital-industry scenarios.',
+'Scaffold weaker or newer learners and add genuine stretch for stronger learners.',
+'If a lesson is theory-only, do not add practical activity or code unless requested.',
+'Programming lessons use code only when it supports the specification.',
+'Use worked examples or model answers before independent assessment where helpful.',
+'Task instructions must be specific and assessment-ready, not vague.',
+'Encourage full-sentence learner responses.',
+'Finish with five recap questions plus an extension or exit ticket.',
+'Never use real learner names in generated examples.',
+'Default to roughly 3 to 3.5 hours and around 20 slides.',
+'Marking format: WWW / EBI / Overall / Indicative Grade.'
+].join('\n');
+
+var GATEWAY=[
+{title:'Project Management',code:'F/618/5180',glh:42,criteria:[
+'1.1 Explain the stages of the project lifecycle as they apply to a given IT project.',
+'1.2 Describe key concepts, issues and risks when managing IT projects.',
+'1.3 Compare the characteristics of different project management methodologies used by organisations.',
+'2.1 Produce a project specification for an IT project in line with requirements.',
+'2.2 Use project management software to plan an IT project.',
+'3.1 Use project management software to monitor a project plan and track progress against the plan.',
+'3.2 Carry out a post-project review to determine project outcomes.'
+]},
+{title:'JavaScript',code:'K/618/5237',glh:42,criteria:[
+'1.1 Explain how JavaScript is used as a web programming language.',
+'2.1 Use JavaScript to prompt and validate inputs in web pages.',
+'2.2 Use document.write to display messages in web pages.',
+'2.3 Alter, show, hide and move objects in web pages.',
+'2.4 Use JavaScript to include special effects in web pages.',
+'2.5 Use functions and variables to customise web pages.',
+'2.6 Use functions and variables for functional web pages.',
+'2.7 Use event handlers to trigger JavaScript code.'
+]},
+{title:'Maths for Computing',code:'M/618/5238',glh:42,criteria:[
+'1.1 Show how matrices can be used to represent ordered data.',
+'1.2 Perform add, subtract and scalar multiplication operations on a matrix.',
+'1.3 Multiply two matrices.',
+'1.4 Find the inverse and transpose of a matrix.',
+'1.5 Apply matrix techniques to solve simultaneous linear equations.',
+'2.1 Apply sequence and series techniques to solve problems.',
+'2.2 Apply probability and recursion techniques to solve problems.',
+'3.1 Explain how number systems are used in computing.',
+'3.2 Perform basic operations on number systems.',
+'3.3 Perform conversion operations between number systems.',
+'4.1 Gather data for a defined purpose.',
+'4.2 Interpret trends and patterns in data.'
+]},
+{title:'Object Oriented Programming',code:'T/618/5239',glh:42,criteria:[
+'1.1 Explain the key features of object oriented programming.',
+'1.2 Explain the importance of encapsulation, inheritance and polymorphism in object oriented programming.',
+'2.1 Demonstrate use of object oriented tools and techniques.',
+'3.1 Design an object oriented program.',
+'3.2 Develop an object oriented program.',
+'4.1 Test an object oriented program.',
+'4.2 Document appropriate action to correct errors.',
+'4.3 Create technical documentation for the support and maintenance of the program.'
+]},
+{title:'Programming Implementation',code:'K/618/5240',glh:42,criteria:[
+'1.1 Explain the principles and concepts of programming languages.',
+'2.1 Interpret variables within programming languages.',
+'2.2 Interpret common programming control structures that are used when developing code.',
+'2.3 Describe the use of common data structures.',
+'2.4 Describe how algorithms are used in programming.',
+'2.5 Describe how to test and debug programs.',
+'3.1 Identify the elements of common coding standards.',
+'3.2 Explain the role and importance of good coding practices.',
+'4.1 Identify the types of functional and non-functional requirements.',
+'4.2 Describe the tests used for functional and non-functional requirements.'
+]},
+{title:'Robot Technology',code:'K/618/5190',glh:42,criteria:[
+'1.1 Explain the operating, design and control principles of different types of robots.',
+'1.2 Explain how different sensors and end effectors are used in robots.',
+'1.3 Analyse the benefits and limitations of using robots for routine tasks.',
+'2.1 Explain how legislation and roboethics influence the development and use of robots.',
+'3.1 Design an operating program for a robot to enable it to carry out a specific function.',
+'3.2 Develop an operating program for a robot to enable it to carry out a specific function.',
+'4.1 Explain the health and safety requirements, and maintenance procedures for the safe operation of robots.'
+]},
+{title:'Software Testing',code:'M/618/5241',glh:42,criteria:[
+'1.1 Explain the purpose and methods of software testing.',
+'1.2 Describe the different stages and types of software testing.',
+'1.3 Explain how automation is used in software testing.',
+'1.4 Describe functional and structural testing.',
+'2.1 Design appropriate test data.',
+'2.2 Develop a test plan in line with requirements.',
+'2.3 Implement a test plan and record results.',
+'2.4 Produce a test report.'
+]}];
+
+var TLEVEL_CORE=[
+{title:'Content Area 1: Problem solving',count:38,paper:1},
+{title:'Content Area 2: Introduction to programming',count:87,paper:1},
+{title:'Content Area 3: Emerging issues',count:8,paper:1},
+{title:'Content Area 4: Legislation and regulatory requirements',count:16,paper:1},
+{title:'Content Area 5: Business context',count:16,paper:2},
+{title:'Content Area 6: Data',count:59,paper:2},
+{title:'Content Area 7: Digital environments',count:32,paper:2},
+{title:'Content Area 8: Security',count:16,paper:2}
+];
+var TLEVEL_OS=[
+'Be able to analyse a problem to define requirements and acceptance criteria aligned to user needs',
+'Apply ethical principles and manage risks in line with legal and regulatory requirements when developing software',
+'Discover, evaluate and apply reliable sources of knowledge',
+'Design',
+'Create solutions in a social and collaborative environment',
+'Implement a solution using at least two appropriate languages',
+'Testing a software solution',
+'Change, maintain and support software'
+];
+
+var store={
+get:function(k,d){try{var v=localStorage.getItem('rwh_live_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+set:function(k,v){localStorage.setItem('rwh_live_'+k,JSON.stringify(v))}
+};
+var state={
+style:store.get('style',DEFAULT_STYLE),
+lessons:store.get('lessons',[]),
+tasks:store.get('tasks',[]),
+learners:store.get('learners',[]),
+coverage:store.get('coverage',{}),
+vault:store.get('vault',[])
+};
+var currentSlides=[];
+var selectedSlide=0;
+var selectedSpecCourse=COURSE1;
+var selectedSpecIndex=0;
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function saveAll(){store.set('style',state.style);store.set('lessons',state.lessons);store.set('tasks',state.tasks);store.set('learners',state.learners);store.set('coverage',state.coverage);store.set('vault',state.vault);refreshKPIs()}
+function go(id){document.querySelectorAll('.page').forEach(function(x){x.classList.toggle('active',x.id===id)});document.querySelectorAll('[data-page]').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-page')===id)});if(id==='courses')renderCourses();if(id==='specs')renderSpecs();if(id==='lesson')renderLesson();if(id==='planner')renderTasks();if(id==='learners')renderLearners();if(id==='settings')renderSettings();if(id==='intelligence')renderVault();window.scrollTo(0,0)}
+window.go=go;
+document.querySelectorAll('[data-page]').forEach(function(b){b.addEventListener('click',function(){go(b.getAttribute('data-page'))})});
+
+function courseUnits(course){
+if(course===COURSE1)return GATEWAY.map(function(x){return x.title});
+return TLEVEL_CORE.map(function(x){return x.title}).concat(['Employer Set Project']).concat(TLEVEL_OS.map(function(x,i){return 'Occupational Specialism '+(i+1)+': '+x}));
+}
+function fillSelect(el,items){el.innerHTML='';items.forEach(function(x){var o=document.createElement('option');o.value=x;o.textContent=x;el.appendChild(o)})}
+function initSelects(){[document.getElementById('specCourse'),document.getElementById('lessonCourse'),document.getElementById('learnerCourse')].forEach(function(el){if(el)fillSelect(el,[COURSE1,COURSE2])});refreshLessonUnits();document.getElementById('lessonCourse').addEventListener('change',refreshLessonUnits);document.getElementById('specCourse').addEventListener('change',function(){selectedSpecCourse=this.value;selectedSpecIndex=0;renderSpecs()});document.getElementById('specSearch').addEventListener('input',renderSpecs)}
+function refreshLessonUnits(){var c=document.getElementById('lessonCourse').value;fillSelect(document.getElementById('lessonUnit'),courseUnits(c))}
+function refreshKPIs(){document.getElementById('kpiLessons').textContent=state.lessons.length;document.getElementById('kpiTasks').textContent=state.tasks.length;document.getElementById('dashStyle').innerHTML=esc(state.style.split('\n').slice(0,6).join('\n')).replace(/\n/g,'<br>')}
+function coverageKey(course,unit){return course+'|'+unit}
+function coveredCount(course,unit,total){var v=state.coverage[coverageKey(course,unit)]||[];return Math.min(v.length,total)}
+
+function renderCourses(){
+var root=document.getElementById('courseCards');
+root.innerHTML='';
+[
+{course:COURSE1,subtitle:'Gateway Qualifications Software Development Level 3 source extract',points:GATEWAY.reduce(function(a,b){return a+b.criteria.length},0),units:GATEWAY.length},
+{course:COURSE2,subtitle:'T Level Technical Qualification in Digital Software Development · Version 1.0 May 2025',points:TLEVEL_CORE.reduce(function(a,b){return a+b.count},0),units:TLEVEL_CORE.length+1+TLEVEL_OS.length}
+].forEach(function(c){
+var div=document.createElement('div');div.className='card course-card';
+div.innerHTML='<div class="course-meta"><div><h3>'+esc(c.course)+'</h3><div class="small muted">'+esc(c.subtitle)+'</div></div><span class="pill">'+c.units+' areas</span></div><div style="margin-top:12px"><div class="small muted">'+c.points+' specification points / criteria represented</div><div class="toolbar"><button class="btn secondary">Open structure</button><button class="btn ghost">Plan lesson</button></div></div>';
+div.querySelectorAll('button')[0].onclick=function(){renderCourseDetail(c.course)};
+div.querySelectorAll('button')[1].onclick=function(){openLessonFor(c.course,courseUnits(c.course)[0])};
+root.appendChild(div)
+});
+renderCourseDetail(COURSE1)
+}
+function renderCourseDetail(course){
+var root=document.getElementById('courseDetail');var units=courseUnits(course);
+var assessment=course===COURSE2?'<div class="stylebox"><b>Assessment structure:</b><br>Core Paper 1: 2h 15m, 90 marks, 30%<br>Core Paper 2: 2h 15m, 90 marks, 30%<br>Employer Set Project: 14h 30m, 100 marks, 40%<br>Occupational Specialism project: 50h 30m, 144 marks.</div>':'';
+root.innerHTML='<h3>'+esc(course)+'</h3>'+assessment+'<div class="list" style="margin-top:12px">'+units.map(function(u){return '<div class="item"><b>'+esc(u)+'</b><div class="toolbar"><button class="btn ghost" onclick="openSpecFor(\''+esc(course).replace(/'/g,"\\'")+'\',\''+esc(u).replace(/'/g,"\\'")+'\')">Open spec</button><button class="btn secondary" onclick="openLessonFor(\''+esc(course).replace(/'/g,"\\'")+'\',\''+esc(u).replace(/'/g,"\\'")+'\')">Plan lesson</button></div></div>'}).join('')+'</div>'
+}
+window.openSpecFor=function(course,unit){go('specs');document.getElementById('specCourse').value=course;selectedSpecCourse=course;var list=specItems(course);var idx=list.findIndex(function(x){return x.title===unit});selectedSpecIndex=Math.max(0,idx);renderSpecs()}
+window.openLessonFor=function(course,unit){go('lesson');document.getElementById('lessonCourse').value=course;refreshLessonUnits();document.getElementById('lessonUnit').value=unit;document.getElementById('lessonTopic').value=unit}
+
+function specItems(course){
+if(course===COURSE1)return GATEWAY;
+var a=TLEVEL_CORE.map(function(x){return {title:x.title,meta:'Core Paper '+x.paper+' · '+x.count+' numbered specification points',criteria:['This area contains '+x.count+' numbered points in the uploaded T Level specification.','Use the official source document in the Hub specification library when planning detailed delivery.']}})
+a.push({title:'Employer Set Project',meta:'14h 30m · 100 marks · 40% of Core component',criteria:['Externally set project assessing the Core skills and knowledge in an applied context.']});
+TLEVEL_OS.forEach(function(t,i){a.push({title:'Occupational Specialism '+(i+1)+': '+t,meta:'Digital Software Development occupational specialism',criteria:['Official occupational specialism content area from the uploaded specification.']})});
+return a
+}
+function renderSpecs(){
+var course=document.getElementById('specCourse').value||selectedSpecCourse;selectedSpecCourse=course;
+var q=(document.getElementById('specSearch').value||'').toLowerCase();var items=specItems(course);
+var menu=document.getElementById('specMenu');menu.innerHTML='';
+items.forEach(function(x,i){if(q&&((x.title+' '+(x.criteria||[]).join(' ')).toLowerCase().indexOf(q)<0))return;var b=document.createElement('button');b.className=i===selectedSpecIndex?'active':'';b.innerHTML='<b>'+esc(x.title)+'</b><div class="small muted">'+esc(x.code||x.meta||'Official specification area')+'</div>';b.onclick=function(){selectedSpecIndex=i;renderSpecs()};menu.appendChild(b)});
+var x=items[selectedSpecIndex]||items[0];if(!x)return;
+var total=(x.criteria||[]).length;var key=coverageKey(course,x.title);var cov=state.coverage[key]||[];
+var crit=(x.criteria||[]).map(function(c,i){var is=cov.indexOf(c)>=0;return '<div class="criterion"><label style="display:flex;gap:9px;align-items:flex-start"><input type="checkbox" style="width:auto;margin-top:3px" '+(is?'checked':'')+' onchange="toggleCoverage('+JSON.stringify(key)+','+JSON.stringify(c)+',this.checked)"><span>'+esc(c)+'</span></label></div>'}).join('');
+document.getElementById('specDetail').innerHTML='<span class="pill">Source verified</span><h2 style="margin:8px 0 4px">'+esc(x.title)+'</h2><div class="small muted">'+esc(x.code?x.code+' · '+x.glh+' GLH':x.meta||'Official uploaded specification')+'</div><div style="margin:12px 0"><b>Coverage:</b> '+coveredCount(course,x.title,total)+' / '+total+'</div>'+crit
+}
+window.toggleCoverage=function(key,c,on){var a=state.coverage[key]||[];if(on&&a.indexOf(c)<0)a.push(c);if(!on)a=a.filter(function(x){return x!==c});state.coverage[key]=a;saveAll()}
+
+function specPointsFor(course,unit){
+if(course===COURSE1){var u=GATEWAY.find(function(x){return x.title===unit});return u?u.criteria:[]}
+var m=unit.match(/Content Area (\d+)/);if(m){var c=TLEVEL_CORE.find(function(x){return x.title.indexOf('Content Area '+m[1]+':')===0});return c?['Official '+c.title+' specification area containing '+c.count+' numbered points.']:[]}
+return ['Official specification area: '+unit]
+}
+function makeTask(topic,group,advanced,exam){
+var intro=group==='Groups of 3'?'Work in groups of 3. ':group==='Pairs'?'Work in pairs. ':group==='Individual'?'Work independently. ':'Choose a suitable working arrangement. ';
+var core=exam?'Answer an assessment-style question on '+topic+'. Structure your response with a clear point, technical explanation and applied example.': 'Complete a focused activity on '+topic+'. Produce a clear written outcome that shows what you understand.';
+if(advanced)core+=' Justify your choices and compare at least two possible approaches.';
+return intro+core+'\n\nExpected output: full sentences and evidence linked to the lesson objective.\nExtension: apply the idea to a different digital workplace scenario.'
+}
+function slide(type,title,body){return {type:type,title:title,body:body}}
+function generateLesson(){
+var course=document.getElementById('lessonCourse').value,unit=document.getElementById('lessonUnit').value,topic=document.getElementById('lessonTopic').value.trim()||unit,count=parseInt(document.getElementById('lessonCount').value,10),mode=document.getElementById('lessonMode').value,group=document.getElementById('lessonGrouping').value,freq=parseInt(document.getElementById('lessonFreq').value,10),prompt=(document.getElementById('lessonPrompt').value||'').toLowerCase(),points=specPointsFor(course,unit);
+var noCode=mode==='100% theoretical'||prompt.indexOf('no code')>=0||prompt.indexOf('theory only')>=0;var advanced=prompt.indexOf('advanced')>=0||prompt.indexOf('challenge')>=0;var exam=prompt.indexOf('exam')>=0||mode==='Assessment preparation';if(prompt.indexOf('groups of 3')>=0)group='Groups of 3';if(prompt.indexOf('pairs')>=0)group='Pairs';
+var slides=[slide('Title',topic,course+'\n'+unit+'\n\nOldham College · Faculty of Digital & Creative'),slide('Task','Do Now / retrieval','Answer three short retrieval questions from previous learning. Write in full sentences.\n\n1. What do you already know about '+topic+'?\n2. Which previous topic connects to this lesson?\n3. Give one workplace example.') ,slide('New learning','Learning objectives','By the end of the lesson, learners will be able to:\n• explain the key ideas in '+topic+'\n• apply the ideas to a realistic scenario\n• produce assessment-ready evidence linked to the specification.')];
+var teach=0;var p=0;
+while(slides.length<count-2){
+var spec=points[p%Math.max(points.length,1)]||('Key concept in '+topic);p++;
+slides.push(slide('New learning','New learning: '+topic,spec+'\n\nKey points:\n• define the idea clearly\n• explain why it matters\n• connect it to a realistic college or workplace system'+(noCode?'':'\n• use a short technical example where it helps')));
+teach++;
+if(teach%freq===0&&slides.length<count-2)slides.push(slide('Task',exam?'Assessment task':'Active task',makeTask(topic,group,advanced,exam)))
+}
+slides.push(slide('Recap','Recap: 5 questions','1. Define the main concept from today.\n2. Explain one benefit or purpose.\n3. Give one realistic example.\n4. Link the lesson to the specification.\n5. Identify one common mistake or misconception.\n\nExtension: justify which idea from the lesson is most important and why.'));
+slides.push(slide('Assessment','Exit ticket','Write one strong paragraph that explains what you learned, applies it to a realistic digital scenario and uses the correct technical vocabulary.'));
+currentSlides=slides.slice(0,count);selectedSlide=0;renderLesson()
+}
+function renderLesson(){var standards=document.getElementById('lessonStandards');if(standards)standards.innerHTML=esc(state.style).replace(/\n/g,'<br>');var thumbs=document.getElementById('thumbs');if(!thumbs)return;thumbs.innerHTML='';currentSlides.forEach(function(s,i){var b=document.createElement('button');b.className='thumb '+(i===selectedSlide?'active':'');b.innerHTML='<b>'+(i+1)+'. '+esc(s.title)+'</b><small>'+esc(s.type)+'</small>';b.onclick=function(){selectedSlide=i;renderLesson()};thumbs.appendChild(b)});var p=document.getElementById('slidePreview');if(!currentSlides.length){p.innerHTML='<div class="card">Generate a lesson to start.</div>';return}var s=currentSlides[selectedSlide];p.innerHTML='<div class="slide"><div class="slide-head"><span>Oldham College</span><span>Faculty of Digital & Creative</span></div><div class="tag">'+esc(s.type)+'</div><h2>'+esc(s.title)+'</h2><div class="body">'+esc(s.body)+'</div><div class="slide-foot"><span>Oldham College</span><span>'+(selectedSlide+1)+' / '+currentSlides.length+'</span></div></div>';document.getElementById('editType').value=s.type;document.getElementById('editTitle').value=s.title;document.getElementById('editBody').value=s.body}
+window.generateLesson=generateLesson;
+function quickPrompt(t){var x=document.getElementById('improvePrompt');x.value=(x.value?x.value+', ':'')+t}window.quickPrompt=quickPrompt;
+function applyImprovement(selectedOnly){
+if(!currentSlides.length)return;var q=(document.getElementById('improvePrompt').value||'').toLowerCase();var idxs=selectedOnly?[selectedSlide]:currentSlides.map(function(_,i){return i});
+idxs.forEach(function(i){var s=currentSlides[i];if(q.indexOf('shorter')>=0)s.body=s.body.split('\n').slice(0,5).join('\n');if(q.indexOf('advanced')>=0&&s.type==='Task')s.body+='\n\nChallenge: compare alternatives, justify your decision and explain one limitation.';if((q.indexOf('theory only')>=0||q.indexOf('no code')>=0))s.body=s.body.replace(/code|programming practical/gi,'theory explanation');if(q.indexOf('groups of 3')>=0&&s.type==='Task')s.body='Work in groups of 3. Assign one clear role to each learner.\n\n'+s.body;if(q.indexOf('paired')>=0&&s.type==='Task')s.body='Work in pairs. Agree one final response together.\n\n'+s.body;if(q.indexOf('exam')>=0&&s.type==='Task'){s.title='Exam-style task';s.body='Answer an assessment-style question using a clear point, technical explanation and applied example.\n\n'+s.body}if(q.indexOf('model answer')>=0&&s.type==='Worked example')s.body+='\n\nModel structure: Point → technical explanation → applied example → link back to the requirement.'});
+if(q.indexOf('recap')>=0&&!selectedOnly&&!currentSlides.some(function(x){return x.type==='Recap'}))currentSlides.push(slide('Recap','Recap: 5 questions','1. Define the concept.\n2. Explain its purpose.\n3. Apply it.\n4. Link to the spec.\n5. Identify a misconception.\n\nExtension: justify your strongest answer.'));
+document.getElementById('improvePrompt').value='';renderLesson()
+}
+window.applyImprovement=applyImprovement;
+function updateSelectedSlide(){if(!currentSlides.length)return;currentSlides[selectedSlide]={type:document.getElementById('editType').value,title:document.getElementById('editTitle').value,body:document.getElementById('editBody').value};renderLesson()}window.updateSelectedSlide=updateSelectedSlide;
+function saveLesson(){if(!currentSlides.length)return alert('Generate a lesson first.');state.lessons.unshift({id:Date.now(),course:document.getElementById('lessonCourse').value,unit:document.getElementById('lessonUnit').value,topic:document.getElementById('lessonTopic').value,date:new Date().toISOString(),slides:JSON.parse(JSON.stringify(currentSlides))});saveAll();alert('Lesson saved on this device.')}window.saveLesson=saveLesson;
+function newLesson(){currentSlides=[];selectedSlide=0;document.getElementById('lessonTopic').value='';document.getElementById('lessonPrompt').value='';renderLesson()}window.newLesson=newLesson;
+
+function prepareRequest(){
+var focus=document.getElementById('intelFocus').value,prompt=document.getElementById('intelPrompt').value.trim();if(!prompt)return alert('Add a request first.');
+var ctx={focus:focus,courses:[COURSE1,COURSE2],style:state.style,savedLessons:state.lessons.slice(0,5),planner:state.tasks.slice(0,10),learners:state.learners.slice(0,20),coverage:state.coverage};
+document.getElementById('prepared').value='You are supporting my Rabiul Work Hub. Use high reasoning effort.\n\nREQUEST:\n'+prompt+'\n\nHUB CONTEXT:\n'+JSON.stringify(ctx,null,2)+'\n\nREQUIREMENTS:\n- Use my stored information as the source of truth.\n- Keep wording concise, natural and professional.\n- For lessons, use my Oldham College teaching style and avoid repeating covered content.\n- Give a finished usable output rather than generic advice.'
+}window.prepareRequest=prepareRequest;
+async function copyPrepared(){var t=document.getElementById('prepared').value;if(!t)return alert('Prepare a request first.');try{await navigator.clipboard.writeText(t);alert('Prepared request copied.')}catch(e){document.getElementById('prepared').select()}}window.copyPrepared=copyPrepared;
+async function shareRequest(){var t=document.getElementById('prepared').value;if(!t){prepareRequest();t=document.getElementById('prepared').value}if(!t)return;if(navigator.share){try{await navigator.share({title:'Rabiul Work Hub request',text:t});return}catch(e){}}copyPrepared()}window.shareRequest=shareRequest;
+function saveVault(){var t=document.getElementById('vaultInput').value.trim();if(!t)return;state.vault.unshift({id:Date.now(),text:t,date:new Date().toISOString()});document.getElementById('vaultInput').value='';saveAll();renderVault()}window.saveVault=saveVault;
+function renderVault(){var root=document.getElementById('vaultList');if(root)root.innerHTML=state.vault.slice(0,10).map(function(x){return '<div class="item"><div class="small muted">'+new Date(x.date).toLocaleString()+'</div>'+esc(x.text).slice(0,500)+'</div>'}).join('')||'<div class="muted small">No saved responses.</div>'}
+
+function addTask(){var t=document.getElementById('taskText').value.trim();if(!t)return;state.tasks.push({id:Date.now(),text:t,date:document.getElementById('taskDate').value,done:false});document.getElementById('taskText').value='';saveAll();renderTasks()}window.addTask=addTask;
+function renderTasks(){document.getElementById('taskList').innerHTML=state.tasks.map(function(x){return '<div class="item"><label style="display:flex;gap:8px"><input type="checkbox" style="width:auto" '+(x.done?'checked':'')+' onchange="toggleTask('+x.id+',this.checked)"><span><b>'+esc(x.text)+'</b><div class="small muted">'+esc(x.date||'No date')+'</div></span></label></div>'}).join('')||'<div class="muted small">No tasks yet.</div>'}window.toggleTask=function(id,on){var x=state.tasks.find(function(a){return a.id===id});if(x)x.done=on;saveAll();renderTasks()}
+
+function addLearner(){var n=document.getElementById('learnerName').value.trim();if(!n)return;state.learners.push({id:Date.now(),name:n,course:document.getElementById('learnerCourse').value,attendance:Number(document.getElementById('learnerAttendance').value||0),note:document.getElementById('learnerNote').value});document.getElementById('learnerName').value='';document.getElementById('learnerAttendance').value='';document.getElementById('learnerNote').value='';saveAll();renderLearners()}window.addLearner=addLearner;
+function renderLearners(){document.getElementById('learnerList').innerHTML=state.learners.map(function(x){return '<div class="item"><b>'+esc(x.name)+'</b><div class="small muted">'+esc(x.course)+' · Attendance '+x.attendance+'%</div><div class="small">'+esc(x.note||'')+'</div></div>'}).join('')||'<div class="muted small">No learner records yet.</div>'}
+
+function renderSettings(){document.getElementById('styleText').value=state.style}
+function saveStyle(){state.style=document.getElementById('styleText').value.trim()||DEFAULT_STYLE;saveAll();renderLesson();alert('Teaching style saved.')}window.saveStyle=saveStyle;
+function resetStyle(){state.style=DEFAULT_STYLE;saveAll();renderSettings();renderLesson()}window.resetStyle=resetStyle;
+function exportData(){var data={version:VERSION,state:state};var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rabiul-work-hub-backup.json';a.click();URL.revokeObjectURL(a.href)}window.exportData=exportData;
+function importData(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d.state)throw new Error('Invalid backup');state=d.state;saveAll();location.reload()}catch(err){alert('Backup could not be imported.')}};r.readAsText(f)}window.importData=importData;
+function resetData(){if(!confirm('Reset all locally stored Work Hub data on this device?'))return;Object.keys(localStorage).filter(function(k){return k.indexOf('rwh_live_')===0}).forEach(function(k){localStorage.removeItem(k)});location.reload()}window.resetData=resetData;
+function runSelfCheck(){var checks=[];checks.push('Version: '+VERSION);try{localStorage.setItem('rwh_test','1');localStorage.removeItem('rwh_test');checks.push('Local storage: OK')}catch(e){checks.push('Local storage: FAILED')};checks.push('Navigation: '+(document.querySelectorAll('[data-page]').length>0?'OK':'FAILED'));checks.push('Specification sources: '+(GATEWAY.length===7&&TLEVEL_CORE.length===8?'OK':'FAILED'));checks.push('Lesson generator: '+(typeof generateLesson==='function'?'OK':'FAILED'));checks.push('Improvement prompt: '+(typeof applyImprovement==='function'?'OK':'FAILED'));checks.push('Native share support: '+(navigator.share?'Available':'Fallback to copy'));document.getElementById('diag').textContent=checks.join('\n')}window.runSelfCheck=runSelfCheck;
+
+initSelects();refreshKPIs();renderCourses();renderSpecs();renderLesson();renderTasks();renderLearners();renderSettings();renderVault();
+})();
+</script>
+</body>
+</html>
