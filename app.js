@@ -175,7 +175,10 @@ window.RWH={go,toggleDrawer};
 function course(id=ui.course){ return D.courses[id]; }
 function dsUnit(id){ return D.courses.digitalSkills.units.find(u=>u.id===id); }
 function allCourseAreas(courseId){
-  if(courseId==='digitalSkills') return D.courses.digitalSkills.units.map(u=>({id:u.id,title:u.title,kind:'unit'}));
+  if(courseId==='digitalSkills') return [
+    ...D.courses.digitalSkills.units.map(u=>({id:u.id,title:u.title,kind:'unit'})),
+    ...(D.courses.digitalSkills.deliveryAreas||[]).map(u=>({id:u.id,title:u.title,kind:'scheme'}))
+  ];
   return [
     ...D.courses.tlevel.core.map(x=>({id:x.id,title:x.title,kind:'core'})),
     {id:'esp',title:'Employer Set Project',kind:'esp'},
@@ -183,7 +186,7 @@ function allCourseAreas(courseId){
   ];
 }
 function areaById(courseId,id){
-  if(courseId==='digitalSkills') return dsUnit(id);
+  if(courseId==='digitalSkills') return dsUnit(id) || (D.courses.digitalSkills.deliveryAreas||[]).find(x=>x.id===id);
   return D.courses.tlevel.core.find(x=>x.id===id) || D.courses.tlevel.os.find(x=>x.id===id) || (id==='esp'?{id:'esp',title:'Employer Set Project',topics:['Applied core knowledge and skills','Planning','Research','Solution development','Evaluation']} : null);
 }
 function coverageKey(courseId,areaId,code='area'){ return [courseId,areaId,code].join('|'); }
@@ -201,7 +204,10 @@ function tlevelCoverage(){
 }
 function unitCriteria(courseId,areaId){
   if(courseId==='digitalSkills'){
-    const u=dsUnit(areaId); return u?u.criteria:[];
+    const u=dsUnit(areaId);
+    if(u) return u.criteria;
+    const a=(D.courses.digitalSkills.deliveryAreas||[]).find(x=>x.id===areaId);
+    return a?[{code:'SOL',text:'Scheme of Learning delivery area: '+a.title+'. Use the relevant awarding-body source when formal assessment criteria are required.'}]:[];
   }
   const a=areaById(courseId,areaId);
   if(!a) return [];
@@ -330,6 +336,11 @@ function renderDigitalCurriculum(){
     </div>
   </div>
   <div class="card" style="margin-top:14px">
+    <div class="card-title"><h3>Scheme of Learning delivery areas</h3><span class="pill">Delivery plan</span></div>
+    <div class="note">These areas are taken from your 2026/27 Scheme of Learning and are kept separate from the official criteria in the uploaded Gateway extract.</div>
+    <div class="grid g2" style="margin-top:10px">${(c.deliveryAreas||[]).map(a=>`<div class="week-card"><strong>${esc(a.title)}</strong><div class="small muted">${esc(a.note)}</div><div class="chips" style="margin-top:7px">${(a.topics||[]).slice(0,5).map(t=>`<span class="pill gray">${esc(t)}</span>`).join('')}</div><div class="toolbar"><button class="btn secondary smallbtn" onclick="RWH.openSpec('${a.id}')">Open area</button><button class="btn ghost smallbtn" onclick="RWH.planArea('digitalSkills','${a.id}')">Plan lesson</button></div></div>`).join('')}</div>
+  </div>
+  <div class="card" style="margin-top:14px">
     <div class="card-title"><h3>Qualification units in uploaded Gateway extract</h3><button class="btn ghost smallbtn" onclick="RWH.go('specs')">Specification library</button></div>
     <div class="grid g2">${c.units.map(u=>{
       const covered=u.criteria.filter(cr=>isCovered(coverageKey('digitalSkills',u.id,cr.code))).length;
@@ -393,12 +404,18 @@ function renderSpecs(){
 function renderSpecAreaList(areas,q){
   return areas.filter(a=>!q || a.title.toLowerCase().includes(q.toLowerCase())).map(a=>{
     const active=a.id===ui.specUnitId;
-    return `<button class="thumb ${active?'active':''}" onclick="RWH.selectSpec('${a.id}')"><b>${esc(a.title)}</b><span>${a.kind==='unit'?(dsUnit(a.id)?.code||'Gateway unit'):a.kind==='core'?'T Level Core':a.kind==='os'?'Occupational Specialism':'Employer Set Project'}</span></button>`;
+    return `<button class="thumb ${active?'active':''}" onclick="RWH.selectSpec('${a.id}')"><b>${esc(a.title)}</b><span>${a.kind==='unit'?(dsUnit(a.id)?.code||'Gateway unit'):a.kind==='scheme'?'Scheme of Learning delivery area':a.kind==='core'?'T Level Core':a.kind==='os'?'Occupational Specialism':'Employer Set Project'}</span></button>`;
   }).join('') || '<div class="empty">No matching areas.</div>';
 }
 function renderSpecDetail(courseId,a){
   if(!a) return '<div class="empty">Select an area.</div>';
   if(courseId==='digitalSkills'){
+    if(!a.criteria){
+      return `<span class="pill">Scheme of Learning</span><h2 style="margin:9px 0 4px">${esc(a.title)}</h2>
+      <div class="note">${esc(a.note||'This is a delivery area from the Scheme of Learning and is kept separate from the uploaded Gateway extract.')}</div>
+      <div class="source-box" style="margin-top:12px"><b>Teaching topics</b><div class="chips">${(a.topics||[]).map(t=>`<span class="pill gray">${esc(t)}</span>`).join('')}</div></div>
+      <div class="toolbar"><button class="btn" onclick="RWH.planArea('${courseId}','${a.id}')">Plan lesson from this delivery area</button></div>`;
+    }
     const covered=a.criteria.filter(c=>isCovered(coverageKey(courseId,a.id,c.code))).length;
     return `<span class="pill blue">Uploaded Gateway source</span><h2 style="margin:9px 0 4px">${esc(a.title)}</h2><div class="small muted">${esc(a.code)} · ${a.glh} GLH · ${a.credits} credits</div>
     <p>${esc(a.aim)}</p>
@@ -422,6 +439,7 @@ function filterSpecs(v){
 }
 function selectSpec(id){ ui.specUnitId=id; document.getElementById('specDetail').innerHTML=renderSpecDetail(ui.course,areaById(ui.course,id)); }
 function openSpec(id){ ui.specUnitId=id; ui.page='specs'; render(); }
+function openSpecCourse(courseId,id){ ui.course=courseId; ui.specUnitId=id; ui.page='specs'; render(); }
 function toggleCoverage(key,val){ setCovered(key,val); if(ui.page==='specs') selectSpec(ui.specUnitId); else render(); }
 function planArea(courseId,areaId){
   ui.course=courseId; ui.page='lesson'; ui.specUnitId=areaId; render();
@@ -498,6 +516,9 @@ function teachingPoints(courseId,areaId,topic){
   const a=areaById(courseId,areaId);
   if(courseId==='digitalSkills'){
     const u=dsUnit(areaId);
+    if(!u){
+      return (a?.topics||[a?.title||topic]).map(t=>({title:t,text:`Explain ${t.toLowerCase()} clearly, then connect it to ${topic||a?.title||'the lesson'} using a realistic digital-workplace example. Keep this as Scheme-of-Learning content unless formal criteria are supplied from the awarding-body source.`}));
+    }
     const uncovered=uncoveredCriteria(courseId,areaId);
     const crit=(uncovered.length?uncovered:u.criteria).map(c=>({title:`Specification ${c.code}`,text:c.text}));
     const concepts=(u.topics||[]).map(t=>({title:t,text:`Explain ${t.toLowerCase()} clearly, then connect it to ${topic||u.title} using a realistic digital-workplace example.`}));
@@ -638,11 +659,14 @@ function hubSearch(query){
   const low=q.toLowerCase();
   const hits=[];
   D.courses.digitalSkills.units.forEach(u=>{
-    if((u.title+' '+u.code+' '+u.aim+' '+u.topics.join(' ')).toLowerCase().includes(low)) hits.push({type:'Digital Skills unit',title:u.title,detail:u.code,action:"RWH.openSpec('"+u.id+"')"});
-    u.criteria.forEach(c=>{if((c.code+' '+c.text).toLowerCase().includes(low))hits.push({type:'Specification criterion',title:u.title+' '+c.code,detail:c.text,action:"RWH.openSpec('"+u.id+"')"});});
+    if((u.title+' '+u.code+' '+u.aim+' '+u.topics.join(' ')).toLowerCase().includes(low)) hits.push({type:'Digital Skills unit',title:u.title,detail:u.code,action:"RWH.openSpecCourse('digitalSkills','"+u.id+"')"});
+    u.criteria.forEach(c=>{if((c.code+' '+c.text).toLowerCase().includes(low))hits.push({type:'Specification criterion',title:u.title+' '+c.code,detail:c.text,action:"RWH.openSpecCourse('digitalSkills','"+u.id+"')"});});
   });
-  D.courses.tlevel.core.forEach(a=>{if((a.title+' '+(a.topics||[]).join(' ')).toLowerCase().includes(low))hits.push({type:'T Level Core',title:a.title,detail:(a.count||0)+' numbered specification points',action:"RWH.openSpec('"+a.id+"')"});});
-  D.courses.tlevel.os.forEach(a=>{if(a.title.toLowerCase().includes(low))hits.push({type:'Occupational Specialism',title:a.title,detail:'T Level Digital Software Development',action:"RWH.openSpec('"+a.id+"')"});});
+  (D.courses.digitalSkills.deliveryAreas||[]).forEach(a=>{
+    if((a.title+' '+(a.topics||[]).join(' ')).toLowerCase().includes(low)) hits.push({type:'Scheme of Learning',title:a.title,detail:a.note||'',action:"RWH.openSpecCourse('digitalSkills','"+a.id+"')"});
+  });
+  D.courses.tlevel.core.forEach(a=>{if((a.title+' '+(a.topics||[]).join(' ')).toLowerCase().includes(low))hits.push({type:'T Level Core',title:a.title,detail:(a.count||0)+' numbered specification points',action:"RWH.openSpecCourse('tlevel','"+a.id+"')"});});
+  D.courses.tlevel.os.forEach(a=>{if(a.title.toLowerCase().includes(low))hits.push({type:'Occupational Specialism',title:a.title,detail:'T Level Digital Software Development',action:"RWH.openSpecCourse('tlevel','"+a.id+"')"});});
   state.lessons.forEach(x=>{if((x.topic+' '+x.areaTitle).toLowerCase().includes(low))hits.push({type:'Saved lesson',title:x.topic,detail:x.courseName||'',action:"RWH.loadLesson('"+x.id+"')"});});
   state.tasks.forEach(x=>{if((x.text||'').toLowerCase().includes(low))hits.push({type:'Planner task',title:x.text,detail:fmtDate(x.date),action:"RWH.go('planner')"});});
   state.learners.forEach(x=>{if((x.ref+' '+(x.strengths||'')+' '+(x.support||'')).toLowerCase().includes(low))hits.push({type:'Learner record',title:x.ref,detail:x.support||x.strengths||'',action:"RWH.go('learners')"});});
@@ -1015,7 +1039,7 @@ function selfCheck(){
 }
 
 Object.assign(window.RWH,{
-  openCourse,planSuggested,setCourse,openSpec,toggleCoverage,specCourseChanged,filterSpecs,selectSpec,planArea,hubSearch,openIntelligenceSearch,
+  openCourse,planSuggested,setCourse,openSpec,openSpecCourse,toggleCoverage,specCourseChanged,filterSpecs,selectSpec,planArea,hubSearch,openIntelligenceSearch,
   lessonCourseChanged,lessonAreaChanged,generateLesson,selectSlide,updateSelectedSlide,deleteSelectedSlide,addImprovePrompt,improveLesson,saveLesson,loadLesson,newLesson,printLesson,
   addESPItem,prepareESPRequest,assessmentCourseChanged,addAssessment,
   markCourseChanged,markAreaChanged,generateFeedback,copyFeedback,saveMarking,prepareMarkingRequest,
