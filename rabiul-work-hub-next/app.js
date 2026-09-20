@@ -1047,10 +1047,10 @@ function intelSnapshot(focus){
 }
 function prepareIntel(){
   const focus=document.getElementById('intelFocus').value,prompt=document.getElementById('intelPrompt').value.trim();if(!prompt)return toast('Add a request first.');
-  const prepared=`Use high reasoning effort.\n\nREQUEST\n${prompt}\n\nRABIUL WORK HUB CONTEXT\n${JSON.stringify(intelSnapshot(focus),null,2)}\n\nWORKING RULES\n- Treat the Hub context and official specification structure as the source of truth.\n- Keep wording concise, natural and professional.\n- For lessons, follow my Oldham College teaching style, use specification links and avoid repeating covered content.\n- For marking, use WWW / EBI / Overall / Indicative Grade and identify exact missing evidence.\n- Do not invent learner facts, specification points or evidence.\n- Give a finished usable output rather than generic advice.`;
+  const prepared=`Use high reasoning effort.\n\nREQUEST\n${prompt}\n\nMYHUB INTELLIGENCE CONTEXT\n${JSON.stringify(intelSnapshot(focus),null,2)}\n\nWORKING RULES\n- Treat the Hub context and official specification structure as the source of truth.\n- Keep wording concise, natural and professional.\n- For lessons, follow my Oldham College teaching style, use specification links and avoid repeating covered content.\n- For marking, use WWW / EBI / Overall / Indicative Grade and identify exact missing evidence.\n- Do not invent learner facts, specification points or evidence.\n- Give a finished usable output rather than generic advice.`;
   document.getElementById('intelPrepared').value=prepared;
 }
-async function shareIntel(){let t=document.getElementById('intelPrepared').value;if(!t){prepareIntel();t=document.getElementById('intelPrepared').value;}if(!t)return;if(navigator.share){try{await navigator.share({title:'Rabiul Work Hub request',text:t});return;}catch(e){}}copyText(t);}
+async function shareIntel(){let t=document.getElementById('intelPrepared').value;if(!t){prepareIntel();t=document.getElementById('intelPrepared').value;}if(!t)return;if(navigator.share){try{await navigator.share({title:'MyHub Intelligence request',text:t});return;}catch(e){}}copyText(t);}
 function copyIntel(){const t=document.getElementById('intelPrepared').value;if(!t)return toast('Prepare a request first.');copyText(t);}
 async function askIntelligence(){
   const prompt=document.getElementById('intelPrompt')?.value.trim();
@@ -1087,9 +1087,9 @@ function renderSettings(){
 }
 function saveSettings(){state.style=document.getElementById('settingsStyle').value.trim()||D.defaultTeachingStyle.join('\n');state.prefs.defaultLessonPrompt=document.getElementById('settingsPrompt').value.trim();saveState();toast('Settings saved.');}
 function resetStyle(){state.style=D.defaultTeachingStyle.join('\n');state.prefs.defaultLessonPrompt='Keep it natural, specification-linked, active and appropriately challenging.';saveState();renderSettings();toast('Teaching style restored.');}
-function exportBackup(){const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),version:D.version,state},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rabiul-work-hub-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+function exportBackup(){const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),version:D.version,state},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='myhub-intelligence-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 function importBackup(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);state=migrate(x.state||x);saveState();toast('Backup imported.');setTimeout(()=>location.reload(),500);}catch(err){toast('Backup could not be imported.');}};r.readAsText(f);}
-function resetAll(){if(!confirm('Reset all locally stored Work Hub data on this browser? This cannot be undone without a backup.'))return;localStorage.removeItem(KEY);state=DEFAULT_STATE();saveState();location.reload();}
+function resetAll(){if(!confirm('Reset all locally stored MyHub Intelligence data on this browser? This cannot be undone without a backup.'))return;localStorage.removeItem(KEY);state=DEFAULT_STATE();saveState();location.reload();}
 function selfCheck(){
   const checks=[];
   checks.push(`Version: ${D.version}`);
