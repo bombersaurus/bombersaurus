@@ -1,8 +1,8 @@
-# Rabiul Work Hub Next
+# MyHub Intelligence
 
-Canonical next-generation build of Rabiul Work Hub.
+Canonical source for the modern teaching/admin Hub.
 
-This folder is self-contained and intended to be deployed as a separate Vercel project with **Root Directory = `rabiul-work-hub-next`**.
+This folder contains only the application source needed for deployment. Private planning notes and product requirements are intentionally kept outside the public repository.
 
 Key principles:
 - modern responsive teaching/admin workspace
@@ -11,6 +11,4 @@ Key principles:
 - specification-led planning
 - no-API **Ask Intelligence** handoff
 - local-first persistence and backup
-- one canonical project instead of multiple patched deployments
-
-See `PROJECT_BRIEF.md` for the full product requirements.
+- one canonical deployment rather than multiple patched copies
